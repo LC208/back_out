@@ -1,8 +1,8 @@
 from rest_framework.serializers import ModelSerializer
+from django.contrib.auth.models import User
 from base.models import DocLink, Practice, Speciality, Theme
 from olddb.models import Companies
 from olddb.serializers import CompanySerializer
-from django.contrib.auth.models import User
 
 class UserSerializer(ModelSerializer):
     class Meta:

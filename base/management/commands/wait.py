@@ -36,7 +36,7 @@ class Command(BaseCommand):
                     cur = con.cursor()
                     cur.execute("SELECT VERSION()")
                 # If an error hasn't been raised, then exit
-                return True
+                return "Connected"
 
             except Exception as Ex:
                 strErr=Ex.args[0]

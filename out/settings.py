@@ -28,7 +28,7 @@ SECRET_KEY = os.getenv("SECRET_KEY",
                        default="django-insecure-e-)6&=p*$m%t_!w&k9ui$to!w1@x^j2d+l+rx*_v9o##ee5qv*")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(os.getenv("DEBUG", default="False"))
 
 ALLOWED_HOSTS = []
 
@@ -96,11 +96,11 @@ WSGI_APPLICATION = "out.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "Practices",
-        "USER": os.getenv("USER", default="localhost"),
-        "PASSWORD": os.getenv("USER", default="228322"),
-        "HOST": "127.0.0.1",
-        "PORT": "4000",
+        "NAME": os.getenv("DB_NAME", default="Practices"),
+        "USER": os.getenv("DB_USER", default="localhost"),
+        "PASSWORD": os.getenv("DB_PASSWORD", default="228322"),
+        "HOST": os.getenv("DB_HOST", default="127.0.0.1"),
+        "PORT": os.getenv("DB_PORT", default="4000"),
         'OPTIONS': {'init_command': 'SET default_storage_engine=INNODB'},
     }
 }

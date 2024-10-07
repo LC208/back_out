@@ -1,17 +1,22 @@
 services:
   db:
-    image: mysql
+    container_name: db
+    image: mysql:8.0-debian
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 228322
-      MYSQL_DATABASE: example
-      MYSQL_USER: localhost
-      MYSQL_PASSWORD: 228322
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_HOST: '%'
     ports:
-      - '3306:3306'
+      - "${DB_PORT}:3306"
     volumes:
       - ./dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysql", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}", "-e", "SELECT 1"]
+      timeout: 5s
+      retries: 10
   back:
     build: ./
     command: bash -c "python manage.py wait 20 && python manage.py runserver 0.0.0.0:8000"
@@ -19,5 +24,9 @@ services:
       - .:/back
     ports:
       - '8000:8000'
+    env_file:
+      - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    network_mode: host

@@ -20,7 +20,7 @@ class Command(BaseCommand):
     help = 'Обновление данных в бд'
 
     def handle(self, *args, **kwargs):
-        r = requests.get(db.API_URL)
+        r = requests.get(db.API_URL, timeout=10)
         if r.status_code == 200:
             mykeys = [*r.json()['RecordSet']]
             facs = self.get_uniq_value(mykeys, ['fac', 'facid'])

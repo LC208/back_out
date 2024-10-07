@@ -19,7 +19,7 @@ services:
       retries: 10
   back:
     build: ./
-    command: bash -c "python manage.py wait 20 && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/back
     ports:

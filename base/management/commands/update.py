@@ -35,11 +35,11 @@ class Command(BaseCommand):
                 cur.execute("SELECT name, id FROM faculty WHERE id in %s", sel_tuple)
                 f_res = cur.fetchall()
                 f_to_add = [x for x in facs if x[0] not in [x[0] for x in f_res]]
-                f_to_del = [x for x in f_res if x[0] not in [x[0] for x in facs]]
+                #f_to_del = [x for x in f_res if x[0] not in [x[0] for x in facs]]
                 cur.executemany("INSERT INTO faculty (name, id, picture) VALUES (%s, %d, '')",
                                     f_to_add)
-                cur.executemany("DELETE faculty WHERE name=%s AND faculty_id=%d",
-                                    f_to_del)
+                #cur.executemany("DELETE faculty WHERE name=%s AND faculty_id=%d",
+                #                    f_to_del)
                 cur.executemany("UPDATE faculty SET picture=%s WHERE name=%s",
                                     picture)
                 for _ , key in facs:
@@ -47,11 +47,11 @@ class Command(BaseCommand):
                     cur.execute("SELECT name FROM base_speciality WHERE faculty_id=%s", [key])
                     g_res = [x[0] for x in cur.fetchall()]
                     g_to_add = [(x[0], key) for x in groups if x[0] not in g_res]
-                    g_to_del = [(x, key) for x in g_res if x not in [x[0] for x in groups]]
+                    #g_to_del = [(x, key) for x in g_res if x not in [x[0] for x in groups]]
                     cur.executemany("INSERT INTO base_speciality (name, faculty_id) VALUES (%s, %s)",
                                     g_to_add)
-                    cur.executemany("DELETE FROM  base_speciality WHERE name=%s AND faculty_id=%s",
-                                    g_to_del)
+                    #cur.executemany("DELETE FROM  base_speciality WHERE name=%s AND faculty_id=%s",
+                                    #g_to_del)
                 
                 con.commit()
             

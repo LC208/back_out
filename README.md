@@ -10,5 +10,5 @@
 4. Устанавливаем все пакеты с помощью команды pip install -r req.txt
 
 ### Запуск через Docker 
-1. в out/settings.py меняем HOST на 'db'
+1. создаём .env прописываем все поля используемые в docker-compose.yml
 2. docker-compose/docker compose up

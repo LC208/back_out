@@ -94,4 +94,4 @@ class UserAuthView(GenericAPIView):
             serializer = UserSerializer(user)
             return Response(serializer.data)
         else:
-            return Response({"error": "Wrong credentials"}, status=400)
+            return Response({"error": "Wrong credentials"}, status=200)

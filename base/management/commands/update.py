@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 import requests
 import out.settings as db
 
-picture = [
+pictures = [
     ('https://job.istu.edu/out/img/IMG_2384.png',
      'Институт авиамашиностроения и транспорта'),
     ('https://job.istu.edu/out/img/kombinirovannoe_logo_png.webp',
@@ -57,7 +57,7 @@ class Command(BaseCommand):
                 #cur.executemany("DELETE faculty WHERE name=%s AND faculty_id=%d",
                 #                    f_to_del)
                 cur.executemany("UPDATE faculty SET picture=%s WHERE name=%s",
-                                    picture)
+                                    pictures)
                 for _ , key in facs:
                     groups = list(self.get_uniq_value(mykeys,
                                                       ['abbr'],

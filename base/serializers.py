@@ -1,10 +1,11 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer,CharField
 from django.contrib.auth.models import User
 from base.models import DocLink, Practice, Speciality, Theme
 from olddb.models import Companies
 from olddb.serializers import CompanySerializer
 
 class UserSerializer(ModelSerializer):
+    company_id = CharField(source="company.user")
     class Meta:
         model = User
         fields = [
@@ -16,8 +17,9 @@ class UserSerializer(ModelSerializer):
             "password",
             "is_staff",
             "is_superuser",
+            "company_id",
         ]
-        read_only_fields = ('id',"is_superuser")
+        read_only_fields = ('id',"is_superuser","company_id")
         extra_kwargs = {
             'password': {'write_only': True}
         }

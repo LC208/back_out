@@ -12,3 +12,5 @@
 ### Запуск через Docker 
 1. создаём .env прописываем все поля используемые в docker-compose.yml
 2. docker-compose/docker compose up
+
+

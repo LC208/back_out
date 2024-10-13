@@ -47,17 +47,6 @@ class Command(BaseCommand):
                         database=db.DATABASES['default']['NAME'])
             with con:
                 cur = con.cursor()
-                sel_tuple = (tuple([x[1] for x in facs]),)
-                cur.execute("SELECT name, id FROM faculty WHERE id in %s", sel_tuple)
-                f_res = cur.fetchall()
-                f_to_add = [x for x in facs if x[0] not in [x[0] for x in f_res]]
-                #f_to_del = [x for x in f_res if x[0] not in [x[0] for x in facs]]
-                cur.executemany("INSERT INTO faculty (name, id, picture) VALUES (%s, %d, '')",
-                                    f_to_add)
-                #cur.executemany("DELETE faculty WHERE name=%s AND faculty_id=%d",
-                #                    f_to_del)
-                cur.executemany("UPDATE faculty SET picture=%s WHERE name=%s",
-                                    pictures)
                 for _ , key in facs:
                     groups = list(self.get_uniq_value(mykeys,
                                                       ['abbr'],

@@ -98,10 +98,7 @@ class UserAuthView(GenericAPIView):
                 'user_id': user.id,
                 'username': user.username
             })
-            serializer = UserSerializer(user)
-            data = serializer.data
-            data['refresh'] = str(refresh)
-            data['access'] = str(refresh.access_token)
+            data = {'refresh' : str(refresh) , 'access': str(refresh.access_token)}
             return Response(data)
         else:
             return Response({"error": "Wrong credentials"})

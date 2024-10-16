@@ -1,4 +1,5 @@
 from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from base.views import (
     DocLinkCreateView,
@@ -27,5 +28,6 @@ urlpatterns = [
     path("auth/", UserAuthView.as_view(), name="auth"),
     path("user/add", UserCreateView.as_view(), name="user-add"),
     path("company/full", CompanyFullListView.as_view(), name="company_list"),
+    path("api/out/base/auth/refresh", TokenRefreshView.as_view())
 
 ]

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
 from pathlib import Path
+from datetime import timedelta
 from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
@@ -77,6 +78,19 @@ TEMPLATES = [
         },
     },
 ]
+
+SIMPLE_JWT = {
+
+    'ROTATE_REFRESH_TOKENS': True,
+
+    'BLACKLIST_AFTER_ROTATION': True,
+
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+
+}
+
 
 REST_FRAMEWORK = {
     # YOUR SETTINGS

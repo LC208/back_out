@@ -1,10 +1,12 @@
 '''
 Модуль вытягивает из API институты и направления обучения в них
 '''
-import MySQLdb
+import re
 from django.core.management.base import BaseCommand
 import requests
 import out.settings as db
+from base.serializers import SpecialitySerializer
+from base.models import Speciality
 
 pictures = [
     ('https://job.istu.edu/out/img/IMG_2384.png',
@@ -30,7 +32,7 @@ pictures = [
 
 class Command(BaseCommand):
     '''
-    Комманда, которая реализует вытягивание из API институтов и направлений обучения в них 
+    Комманда, которая реализует вытягивание из API направлений обучения
     и добавляение этих значений в БД
     '''
     help = 'Обновление данных в бд'
@@ -39,43 +41,25 @@ class Command(BaseCommand):
         r = requests.get(db.API_URL, timeout=10)
         if r.status_code == 200:
             mykeys = [*r.json()['RecordSet']]
-            facs = self.get_uniq_value(mykeys, ['fac', 'facid'])
-            con = MySQLdb.connect(host=db.DATABASES['default']['HOST'],
-                        port=int(db.DATABASES['default']['PORT']),
-                        user=db.DATABASES['default']['USER'],
-                        password=db.DATABASES['default']['PASSWORD'],
-                        database=db.DATABASES['default']['NAME'])
-            with con:
-                cur = con.cursor()
-                sel_tuple = (tuple([x[1] for x in facs]),)
-                cur.execute("SELECT name, id FROM faculty WHERE id in %s", sel_tuple)
-                f_res = cur.fetchall()
-                f_to_add = [x for x in facs if x[0] not in [x[0] for x in f_res]]
-                #f_to_del = [x for x in f_res if x[0] not in [x[0] for x in facs]]
-                cur.executemany("INSERT INTO faculty (name, id, picture) VALUES (%s, %d, '')",
-                                    f_to_add)
-                #cur.executemany("DELETE faculty WHERE name=%s AND faculty_id=%d",
-                #                    f_to_del)
-                cur.executemany("UPDATE faculty SET picture=%s WHERE name=%s",
-                                    pictures)
-                for _ , key in facs:
-                    groups = list(self.get_uniq_value(mykeys,
-                                                      ['abbr'],
-                                                      lambda x, key=key: x['facid'] == key))
-                    cur.execute("SELECT name FROM base_speciality WHERE faculty_id=%s", [key])
-                    g_res = [x[0] for x in cur.fetchall()]
-                    g_to_add = [(x[0], key) for x in groups if x[0] not in g_res]
-                    #g_to_del = [(x, key) for x in g_res if x not in [x[0] for x in groups]]
-                    cur.executemany('''INSERT INTO base_speciality (name, faculty_id)
-                                    VALUES (%s, %s)''',
-                                    g_to_add)
-                    #cur.executemany("DELETE FROM  base_speciality WHERE name=%s AND faculty_id=%s",
-                                    #g_to_del)
+            groups = list(self.get_uniq_value(mykeys,
+                                                ['abbr', 'facid'],
+                                                reg=r'[.]'))
+            not_in = list()
+            specs = Speciality.objects.all()
+            for spec in specs:
+                if (spec.name, spec.faculty_id) not in groups:
+                    spec.delete()
+            for x in groups:
+                name = x[0]
+                faculty_id = x[1]
+                if not Speciality.objects.filter(name=name, faculty=faculty_id):
+                    not_in.append({'name':name, 'faculty':faculty_id})
+                
+            deser = SpecialitySerializer(data=not_in, many=True)
+            if deser.is_valid():
+                deser.save()
 
-                con.commit()
-
-
-    def get_uniq_value(self, dict_list, names, restrict=lambda x: True):
+    def get_uniq_value(self, dict_list, names, restrict=lambda x: True, reg=''):
         '''
         @param dict_list: Лист из словарей с набором значений
         @param names: Набор параметров, который мы вытаскиваем из словарей
@@ -83,4 +67,4 @@ class Command(BaseCommand):
         @return: Уникальные значения для кортежей из параметров names 
         из списка словарей dict_list с ограничением restrict
         '''
-        return set([tuple(x[i] for i in names) for x in dict_list if restrict(x)])
+        return set([tuple(re.sub(reg, '', x[i]) if isinstance(x[i], str) else x[i] for i in names) for x in dict_list if restrict(x)])

@@ -20,6 +20,7 @@ from base.serializers import (
     AuthSerializer,
 )
 from olddb.models import Companies
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 # Create your views here.
@@ -86,12 +87,18 @@ class UserAuthView(GenericAPIView):
     serializer_class = AuthSerializer
 
     def post(self, request):
+
         user = authenticate(
             username=request.data.get("username"),
             password=request.data.get("password"),
         )
         if user is not None:
-            serializer = UserSerializer(user)
-            return Response(serializer.data)
+            refresh = RefreshToken.for_user(user)
+            refresh.payload.update({
+                'user_id': user.id,
+                'username': user.username
+            })
+            data = {'refresh' : str(refresh) , 'access': str(refresh.access_token)}
+            return Response(data)
         else:
-            return Response({"error": "Wrong credentials"}, status=200)
+            return Response({"error": "Wrong credentials"})

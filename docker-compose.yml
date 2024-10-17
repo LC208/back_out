@@ -13,13 +13,14 @@ services:
       - "${DB_PORT}:3306"
     volumes:
       - ./dbdata:/var/lib/mysql
+      - ${DUMP_PATH}:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysql", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}", "-e", "SELECT 1"]
-      timeout: 5s
-      retries: 10
+      timeout: 10s
+      retries: 20
   back:
     build: ./
-    command: bash -c "python manage.py runserver 0.0.0.0:8000"
+    command: bash -c  "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/back
     ports:

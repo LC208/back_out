@@ -7,6 +7,7 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
     GenericAPIView
 )
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from base.models import Practice, DocLink, Speciality, Theme
@@ -85,6 +86,7 @@ class UserCreateView(CreateAPIView):
 
 class UserAuthView(GenericAPIView):
     serializer_class = AuthSerializer
+    permission_classes = [AllowAny]
 
     def post(self, request):
 

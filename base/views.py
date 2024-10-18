@@ -8,7 +8,7 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
     GenericAPIView
 )
-from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from base.models import Practice, DocLink, Speciality, Theme
@@ -30,26 +30,31 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class SpecilityCreateView(CreateAPIView):
+    permission_classes = [IsAdminUser]
     queryset = Speciality.objects.all()
     serializer_class = SpecialitySerializer
 
 
 class CompanyFullListView(ListAPIView):
+    permission_classes = [AllowAny]
     queryset = Companies.objects.all()
     serializer_class = CompanyFullSerializer
 
 
 class SpecialityList(ListAPIView):
+    permission_classes = [AllowAny]
     queryset = Speciality.objects.all()
     serializer_class = SpecialitySerializer
 
 
 class SpecialitySingleView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser|IsAuthenticated]
     queryset = Speciality.objects.all()
     serializer_class = SpecialitySerializer
 
 
 class PracticeCreateView(CreateAPIView):
+    permission_classes = [IsAdminUser]
     queryset = Practice.objects.all()
     serializer_class = PracticeAddSerializer
 
@@ -62,21 +67,25 @@ class PracticesList(ListAPIView):
 
 
 class PracticeSingleView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser|IsAuthenticated]
     queryset = Practice.objects.all()
     serializer_class = PracticeListSerializer
 
 
 class DocLinkCreateView(CreateAPIView):
+    permission_classes = [IsAdminUser]
     queryset = DocLink.objects.all()
     serializer_class = DockLinkSerializer
 
 
 class ThemeCreateView(CreateAPIView):
+    permission_classes = [IsAdminUser]
     queryset = Theme.objects.all()
     serializer_class = ThemeSerializer
 
 
 class UserCreateView(CreateAPIView):
+    permission_classes = [IsAdminUser]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 

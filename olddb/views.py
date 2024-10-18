@@ -9,11 +9,8 @@ from rest_framework.permissions import IsAdminUser, AllowAny, SAFE_METHODS, Base
 from olddb.models import Faculty, Companies
 # from models import Faculty
 from olddb.serializers import CompanySerializer, FacultySerializer
+from base.permissions import ReadOnly
 
-
-class ReadOnly(BasePermission):
-    def has_permission(self, request, view):
-        return request.method in SAFE_METHODS
 
 class FacultyList(ListAPIView):
     permission_classes = [AllowAny]
@@ -22,11 +19,12 @@ class FacultyList(ListAPIView):
 
 
 class FacultyCreateView(CreateAPIView):
+    permission_classes = [IsAdminUser]
     queryset = Faculty.objects.all()
     serializer_class = FacultySerializer
 
 
-class FacultySingleView(RetrieveUpdateDestroyAPIView): 
+class FacultySingleView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminUser|ReadOnly]
     queryset = Faculty.objects.all()
     serializer_class = FacultySerializer
@@ -39,9 +37,9 @@ class CompanyListView(ListAPIView):
 
 
 class CompanyCreateView(CreateAPIView):
+    permission_classes = [IsAdminUser]
     queryset = Companies.objects.all()
     serializer_class = CompanySerializer
-    permission_classes = [IsAdminUser]
 
 
 class CompanySingleView(RetrieveUpdateDestroyAPIView):

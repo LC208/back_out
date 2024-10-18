@@ -1,3 +1,4 @@
+from rest_framework import status
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django_filters import rest_framework as filters
@@ -7,7 +8,7 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
     GenericAPIView
 )
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from base.models import Practice, DocLink, Speciality, Theme
@@ -19,6 +20,7 @@ from base.serializers import (
     SpecialitySerializer,
     UserSerializer,
     AuthSerializer,
+    LogOutSerializer,
 )
 from olddb.models import Companies
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -104,3 +106,17 @@ class UserAuthView(GenericAPIView):
             return Response(data)
         else:
             return Response({"error": "Wrong credentials"})
+
+class UserLogOutView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = LogOutSerializer
+    def post(self,request):
+        refresh_token = request.data.get('refresh_token')
+        if not refresh_token:
+            return Response({'error':'Required refresh token'},status=status.HTTP_400_BAD_REQUEST)
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        except Exception as e:
+            return Response({'error': 'Invalid Refresh token'},status=status.HTTP_400_BAD_REQUEST)
+        return Response ({'success':'Success log out'},status=status.HTTP_200_OK)

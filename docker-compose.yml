@@ -16,8 +16,8 @@ services:
       - ${DUMP_PATH}:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysql", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}", "-e", "SELECT 1"]
-      timeout: 10s
-      retries: 20
+      timeout: 1s
+      retries: 100
   back:
     build: ./
     command: bash -c  "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"

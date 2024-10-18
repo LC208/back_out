@@ -37,8 +37,7 @@ class AuthSerializer(ModelSerializer):
         write_only_fields = ("password",)
 
 class LogOutSerializer(Serializer):
-    refresh_token = serializers.CharField(required=True)
-
+    refresh_token = serializers.CharField(required=True,write_only=True)
 
 class DockLinkSerializer(ModelSerializer):
     class Meta:

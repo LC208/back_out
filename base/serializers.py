@@ -1,4 +1,5 @@
-from rest_framework.serializers import ModelSerializer,CharField
+from rest_framework.serializers import ModelSerializer,CharField,Serializer
+from rest_framework import serializers
 from django.contrib.auth.models import User
 from base.models import DocLink, Practice, Speciality, Theme
 from olddb.models import Companies
@@ -34,6 +35,9 @@ class AuthSerializer(ModelSerializer):
             "password",
         ]
         write_only_fields = ("password",)
+
+class LogOutSerializer(Serializer):
+    refresh_token = serializers.CharField(required=True,write_only=True)
 
 class DockLinkSerializer(ModelSerializer):
     class Meta:

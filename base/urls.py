@@ -29,7 +29,7 @@ urlpatterns = [
     path("auth/", UserAuthView.as_view(), name="auth"),
     path("user/add", UserCreateView.as_view(), name="user_add"),
     path("company/full", CompanyFullListView.as_view(), name="company_list"),
-    path("auth/refresh", TokenRefreshView.as_view())
+    path("auth/refresh", TokenRefreshView.as_view()),
     path("auth/refresh", TokenRefreshView.as_view()),
     path("auth/log_out",UserLogOutView.as_view())
 

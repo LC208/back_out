@@ -135,20 +135,23 @@ class UserLogOutView(GenericAPIView):
 
 class CompamySingleViewByToken(APIView):
     authentication_classes = [JWTAuthentication]
+
     def post(self,request):
-        access_token_raw = request.data.get('access_token')
-        access_token = AccessToken(access_token_raw)
-        user_id = access_token.payload["user_id"]
-        user_selected = User.objects.get(id=user_id)
+        user_selected = User.objects.get(id=request.user.id)
         if user_selected is None:
-            return Response({'error': 'User not found'},status=status.HTTP_400_BAD_REQUEST)
-        compamy_selected = Companies.objects.get(user=user_selected)
-        if compamy_selected is None:
-            return Response({'error': 'Company related to current user not found'},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'User not found'},status=401)
+        compamy_selected = Companies.objects.filter(user=request.user.id)
+        if len(compamy_selected) == 0:
+            return Response({'username': user_selected.username,
+                         'email':user_selected.email,
+                         'first_name':user_selected.first_name,
+                         'last_name':user_selected.last_name,
+                         },status=200)
+        compamy_selected = compamy_selected.get(user=request.user.id)
         return Response({'username': user_selected.username,
                          'email':user_selected.email,
                          'first_name':user_selected.first_name,
                          'last_name':user_selected.last_name,
                          'company_name':compamy_selected.name,
                          'company_image':compamy_selected.image,
-                         },status=status.HTTP_200_OK)
+                         },status=200)

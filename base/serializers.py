@@ -17,10 +17,8 @@ class UserSerializer(ModelSerializer):
             "email",
             "password",
             "is_staff",
-            "is_superuser",
-            "company_id",
         ]
-        read_only_fields = ('id',"is_superuser","company_id")
+        read_only_fields = ('id',)
         extra_kwargs = {
             'password': {'write_only': True}
         }

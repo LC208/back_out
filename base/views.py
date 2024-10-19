@@ -8,6 +8,7 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
     GenericAPIView
 )
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -23,7 +24,10 @@ from base.serializers import (
     LogOutSerializer,
 )
 from olddb.models import Companies
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+
 
 
 # Create your views here.
@@ -129,3 +133,24 @@ class UserLogOutView(GenericAPIView):
         except Exception as e:
             return Response({'error': 'Invalid Refresh token'},status=status.HTTP_400_BAD_REQUEST)
         return Response ({'success':'Success log out'},status=status.HTTP_200_OK)
+
+class CompamySingleViewByToken(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    def post(self,request):
+        access_token_raw = request.data.get('access_token')
+        access_token = AccessToken(access_token_raw)
+        user_id = access_token.payload["user_id"]
+        user_selected = User.objects.get(id=user_id)
+        if user_selected is None:
+            return Response({'error': 'User not found'},status=status.HTTP_400_BAD_REQUEST)
+        compamy_selected = Companies.objects.get(user=user_selected)
+        if compamy_selected is None:
+            return Response({'error': 'Company related to current user not found'},status=status.HTTP_400_BAD_REQUEST)
+        return Response({'username': user_selected.username,
+                         'email':user_selected.email,
+                         'first_name':user_selected.first_name,
+                         'last_name':user_selected.last_name,
+                         'company_name':compamy_selected.name,
+                         'company_image':compamy_selected.image,
+                         },status=status.HTTP_200_OK)

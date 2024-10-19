@@ -6,7 +6,7 @@ from olddb.models import Companies
 from olddb.serializers import CompanySerializer
 
 class UserSerializer(ModelSerializer):
-    company_id = CharField(source="company.user")
+    company_id = CharField(source="company.user", required=False)
     class Meta:
         model = User
         fields = [

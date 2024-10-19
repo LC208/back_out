@@ -121,7 +121,6 @@ class UserAuthView(GenericAPIView):
             return Response({"error": "Wrong credentials"})
 
 class UserLogOutView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
     serializer_class = LogOutSerializer
     def post(self,request):
         refresh_token = request.data.get('refresh_token')
@@ -135,7 +134,6 @@ class UserLogOutView(GenericAPIView):
         return Response ({'success':'Success log out'},status=status.HTTP_200_OK)
 
 class CompamySingleViewByToken(APIView):
-    permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     def post(self,request):
         access_token_raw = request.data.get('access_token')

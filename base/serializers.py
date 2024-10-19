@@ -6,7 +6,6 @@ from olddb.models import Companies
 from olddb.serializers import CompanySerializer
 
 class UserSerializer(ModelSerializer):
-    company_id = CharField(source="company.user", required=False)
     class Meta:
         model = User
         fields = [
@@ -17,9 +16,8 @@ class UserSerializer(ModelSerializer):
             "email",
             "password",
             "is_staff",
-            "company_id",
         ]
-        read_only_fields = ('id', "company_id")
+        read_only_fields = ('id', )
         extra_kwargs = {
             'password': {'write_only': True}
         }

@@ -50,6 +50,7 @@ class DockLinkSerializer(ModelSerializer):
 
 
 class PracticeAddSerializer(ModelSerializer):
+    company = CompanySerializer(many=True)
     class Meta:
         model = Practice
         fields = "__all__"

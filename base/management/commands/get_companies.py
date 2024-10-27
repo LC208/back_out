@@ -1,7 +1,7 @@
 import re
 import requests
 from django.core.management.base import BaseCommand
-from olddb.serializers import CompanySerializer
+from base.serializers import CompanySerializer,PracticeAddSerializer,DockLinkSerializer
 
 
 class Command(BaseCommand):
@@ -19,7 +19,6 @@ class Command(BaseCommand):
         images = []
         agreements = []
         urls = []
-        result = []
         sections = re.split('li id="section-([1-9][0-9]?|0)',src)#i-ая секция хранит всю информацию о i-ой компании
         for i in range(4,len(sections),2):
             companies.append(sections[i])
@@ -33,7 +32,9 @@ class Command(BaseCommand):
             img_src = re.findall('<img src="\S+"',companies[i])[0]
             images.append((re.findall('http\S+"',img_src)[0])[:-1]) if not("icon" in img_src) else images.append(None)
             #agreements
-            agreements_array = re.findall('Договор[^<]+<',companies[i])
+            agreements_array = re.findall('Договор с ИрНИТУ.+[0-9][0-9]\.[0-9][0-9]\.[0-9][0-9]',companies[i])
+            for elem in range(len(agreements_array)):#для удаления тегов внутри
+                agreements_array[elem] = re.sub(r'<.*?>', '', agreements_array[elem])
             if len(agreements_array)>0:
                 agreements_array = agreements_array[0].replace('\xa0',' ',1)
                 agreements.append(agreements_array[:-1])
@@ -50,8 +51,32 @@ class Command(BaseCommand):
                 sub_src = sub_req.text
                 raw_site = re.findall('Нажмите на ссылку <a href="\S+" >\S+</a>', sub_src)
                 urls.append((requests.get(link, allow_redirects=True)).url) if len(raw_site)==0 else urls.append((re.findall('http.+"', raw_site[0])[0])[:-1])
+
         for i in range(len(companies)):
-            result.append({'name':names[i],'image':images[i],'agreements':agreements[i],'url':urls[i]})
-        #deser = CompanySerializer(data=result, many=True)
-
-
+            company_data = [{'name':names[i],'image':images[i],'agreements':agreements[i]}]
+            companies = []
+            for company in company_data:
+                company_serializer = CompanySerializer(data=company)
+                if company_serializer.is_valid():
+                    company_instance = company_serializer.save()
+                    companies.append(company_instance)  # Сохраняем экземпляры авторов
+                else:
+                    self.stdout.write(self.style.ERROR(f"Ошибка: {company_serializer.errors}"))
+            for j in range(len(companies)):
+                practice_data = [{'name':names[j],'faculty':5,'company':companies[j].id}]
+                practices = []
+                for practice in practice_data:
+                    practice_serializer = PracticeAddSerializer(data=practice)
+                    if practice_serializer.is_valid():
+                        practice_instance = practice_serializer.save()
+                        practices.append(practice_instance)  # Сохраняем экземпляры книг
+                    else:
+                        self.stdout.write(self.style.ERROR(f"Ошибка: {practice_serializer.errors}"))
+            for j in range(len(practices)):
+                dock_data = [{'type': 'Веб-сайт', 'url': urls[i],'practice':practices[j].id}]
+                for dock in dock_data:
+                    dock_serializer = DockLinkSerializer(data=dock)
+                    if dock_serializer.is_valid():
+                        dock_serializer.save()
+                    else:
+                        self.stdout.write(self.style.ERROR(f"Ошибка: {dock_serializer.errors}"))

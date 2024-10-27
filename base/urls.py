@@ -1,5 +1,4 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
 
 from base.views import (
     DocLinkCreateView,
@@ -15,6 +14,7 @@ from base.views import (
     CompanyFullListView,
     UserLogOutView,
     CompamySingleViewByToken,
+    CookieTokenRefreshView,
 )
 
 urlpatterns = [
@@ -30,7 +30,7 @@ urlpatterns = [
     path("auth/", UserAuthView.as_view(), name="auth"),
     path("user/add", UserCreateView.as_view(), name="user_add"),
     path("company/full", CompanyFullListView.as_view(), name="company_list"),
-    path("auth/refresh", TokenRefreshView.as_view()),
+    path("auth/refresh", CookieTokenRefreshView.as_view()),
     path("auth/log_out",UserLogOutView.as_view()),
     path("user/info",CompamySingleViewByToken.as_view()),
 

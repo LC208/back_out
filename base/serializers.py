@@ -50,7 +50,6 @@ class PracticeAddSerializer(ModelSerializer):
         model = Practice
         fields = "__all__"
 
-
 class SpecialitySerializer(ModelSerializer):
 
     class Meta:
@@ -72,6 +71,34 @@ class PracticeListSerializer(ModelSerializer):
         model = Practice
         fields = "__all__"
 
+class PracticeSerializer(ModelSerializer):
+    company = CharField(required=False)
+    class Meta:
+        model = Practice
+        fields = "__all__"
+
+class Company_Serializer(serializers.ModelSerializer):
+    practices = PracticeSerializer(many=True, required=False)
+    links = DockLinkSerializer(many=True, required=False)
+    users = UserSerializer(required=False)
+    class Meta:
+        model = Companies
+        fields = ['name','image','agreements','practices','users', 'links']
+
+    def create(self, validated_data):
+        practices_data = validated_data.pop('practices', [])
+        users_data = validated_data.pop('users', [])
+        user = User.objects.create(**users_data)
+        user.set_password(user.password)
+        user.save()
+        company = Companies.objects.create(user=user,**validated_data)
+        for practice_data in practices_data:
+            practice_data["company"]=company
+            prac = Practice.objects.create( **practice_data)
+            links_data = practice_data.pop('links', [])
+            for link_data in links_data:
+                DocLink.objects.create(practice=prac, **link_data)
+        return company
 
 class CompanyFullSerializer(ModelSerializer):
 

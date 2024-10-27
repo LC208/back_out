@@ -1,5 +1,4 @@
 from rest_framework.serializers import ModelSerializer, StringRelatedField
-
 from olddb.models import Companies, Faculty
 
 

@@ -93,6 +93,8 @@ class Company_Serializer(serializers.ModelSerializer):
         practices_data = validated_data.pop('practices', [])
         users_data = validated_data.pop('users', [])
         user = User.objects.create(**users_data)
+        user.set_password(user.password)
+        user.save()
         company = Companies.objects.create(user=user,**validated_data)
         for practice_data in practices_data:
             practice_data["company"]=company

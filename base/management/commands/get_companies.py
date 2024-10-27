@@ -3,7 +3,7 @@ import requests
 import random
 import string
 from django.core.management.base import BaseCommand
-from base.serializers import CompanySerializer, PracticeAddSerializer, DockLinkSerializer,Company_Serializer
+from base.serializers import Company_Serializer
 
 
 class Command(BaseCommand):
@@ -80,7 +80,7 @@ class Command(BaseCommand):
             login_user = login_user.replace('  ', '_').replace(' ', '_').replace('-', '_').replace('.', '').replace('"', '').replace(',', '')
             login_user = login_user[1:] if login_user[0]=='_' else login_user
             pass_user = self.generate_random_string(8)
-            user.append({'username':login_user,'password':pass_user})
+            user.append({'username':login_user,'password':pass_user,'is_staff':0})
             #sending data
             data_set={
             "name": names[i],
@@ -93,3 +93,7 @@ class Command(BaseCommand):
                 ser.save()
             else:
                 self.stdout.write(self.style.ERROR(f"Ошибка: {ser.errors}"))
+
+        with open('example.txt', 'w') as file:
+            # Записываем строку в файл
+            file.write(str([{"username":x["username"],"password":x["password"]} for x in user ]))

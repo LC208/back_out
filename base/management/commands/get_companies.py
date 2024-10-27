@@ -1,10 +1,32 @@
 import re
 import requests
+import random
+import string
 from django.core.management.base import BaseCommand
-from base.serializers import CompanySerializer,PracticeAddSerializer,DockLinkSerializer
+from base.serializers import CompanySerializer, PracticeAddSerializer, DockLinkSerializer,Company_Serializer
 
 
 class Command(BaseCommand):
+    def translit(self,text):
+        translit_dict = {
+            'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'Yo',
+            'Ж': 'Zh', 'З': 'Z', 'И': 'I', 'Й': 'Y', 'К': 'K', 'Л': 'L', 'М': 'M',
+            'Н': 'N', 'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U',
+            'Ф': 'F', 'Х': 'Kh', 'Ц': 'Ts', 'Ч': 'Ch', 'Ш': 'Sh', 'Щ': 'Sch', 'Ъ': '',
+            'Ы': 'Y', 'Ь': '', 'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya',
+            'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
+            'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+            'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+            'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch', 'ъ': '',
+            'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+            ' ': ' '
+        }
+        return ''.join(translit_dict.get(char, char) for char in text)
+
+    def generate_random_string(self,n):
+        characters = string.ascii_letters + string.digits  # Включает буквы и цифры
+        return ''.join(random.choice(characters) for _ in range(n))
+
     def handle(self,*args,**_):
         st_accept = "text/html"
         st_useragent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
@@ -19,6 +41,7 @@ class Command(BaseCommand):
         images = []
         agreements = []
         urls = []
+        user = []
         sections = re.split('li id="section-([1-9][0-9]?|0)',src)#i-ая секция хранит всю информацию о i-ой компании
         for i in range(4,len(sections),2):
             companies.append(sections[i])
@@ -51,32 +74,22 @@ class Command(BaseCommand):
                 sub_src = sub_req.text
                 raw_site = re.findall('Нажмите на ссылку <a href="\S+" >\S+</a>', sub_src)
                 urls.append((requests.get(link, allow_redirects=True)).url) if len(raw_site)==0 else urls.append((re.findall('http.+"', raw_site[0])[0])[:-1])
-
-        for i in range(len(companies)):
-            company_data = [{'name':names[i],'image':images[i],'agreements':agreements[i]}]
-            companies = []
-            for company in company_data:
-                company_serializer = CompanySerializer(data=company)
-                if company_serializer.is_valid():
-                    company_instance = company_serializer.save()
-                    companies.append(company_instance)  # Сохраняем экземпляры авторов
-                else:
-                    self.stdout.write(self.style.ERROR(f"Ошибка: {company_serializer.errors}"))
-            for j in range(len(companies)):
-                practice_data = [{'name':names[j],'faculty':5,'company':companies[j].id}]
-                practices = []
-                for practice in practice_data:
-                    practice_serializer = PracticeAddSerializer(data=practice)
-                    if practice_serializer.is_valid():
-                        practice_instance = practice_serializer.save()
-                        practices.append(practice_instance)  # Сохраняем экземпляры книг
-                    else:
-                        self.stdout.write(self.style.ERROR(f"Ошибка: {practice_serializer.errors}"))
-            for j in range(len(practices)):
-                dock_data = [{'type': 'Веб-сайт', 'url': urls[i],'practice':practices[j].id}]
-                for dock in dock_data:
-                    dock_serializer = DockLinkSerializer(data=dock)
-                    if dock_serializer.is_valid():
-                        dock_serializer.save()
-                    else:
-                        self.stdout.write(self.style.ERROR(f"Ошибка: {dock_serializer.errors}"))
+            # users
+            login_user = names[i]
+            login_user = self.translit(login_user) if len(re.findall('\".+\"',names[i]))==0 else self.translit(re.findall('\".+\"',names[i])[0])
+            login_user = login_user.replace('  ', '_').replace(' ', '_').replace('-', '_').replace('.', '').replace('"', '').replace(',', '')
+            login_user = login_user[1:] if login_user[0]=='_' else login_user
+            pass_user = self.generate_random_string(8)
+            user.append({'username':login_user,'password':pass_user})
+            #sending data
+            data_set={
+            "name": names[i],
+            "image":images[i],
+            "agreements":agreements[i],
+            "users":user[i],
+            "practices":[{"name":names[i],"faculty":5,"links":[{"type":"Веб-сайт","url":urls[i]}]}],}
+            ser = Company_Serializer(data=data_set)
+            if ser.is_valid():
+                ser.save()
+            else:
+                self.stdout.write(self.style.ERROR(f"Ошибка: {ser.errors}"))

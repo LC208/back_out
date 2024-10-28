@@ -93,50 +93,27 @@ class AuthsUserprofile(models.Model):
         db_table = 'auths_userprofile'
 
 
-class DocLink(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    type = models.TextField()
-    url = models.CharField(max_length=1000)
-    practice_id = models.BigIntegerField()
 
-    class Meta:
-        managed = False
-        db_table = 'base_doclink'
-
-
-class Practice(models.Model):
-    id = models.BigAutoField(primary_key=True)
+class Faculty(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
-    company_id = models.BigIntegerField()
-    faculty_id = models.BigIntegerField()
+    picture = models.CharField(max_length=1000)
 
     class Meta:
         managed = False
-        db_table = 'base_practice'
-
+        db_table = 'faculty'
 
 class Speciality(models.Model):
-    id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255, blank=True, null=True)
-    faculty_id = models.BigIntegerField()
+    faculty = models.ForeignKey(
+        Faculty, on_delete=models.CASCADE, related_name="specialities"
+    )
 
     class Meta:
         managed = False
         db_table = 'base_speciality'
 
 
-class Theme(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
-    practice = models.ForeignKey(Practice, models.DO_NOTHING, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'base_theme'
-
-
 class Companies(models.Model):
-    id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     themes = models.CharField(max_length=255, blank=True, null=True)
     dbegin = models.CharField(max_length=255, blank=True, null=True)
@@ -148,6 +125,41 @@ class Companies(models.Model):
     class Meta:
         managed = False
         db_table = 'companies'
+
+class Practice(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+    company = models.ForeignKey(
+        Companies, on_delete=models.DO_NOTHING, related_name="company"
+    )
+    faculty = models.ForeignKey(
+        Faculty, on_delete=models.DO_NOTHING, related_name="faculty"
+    )
+
+    class Meta:
+        managed = False
+        db_table = 'base_practice'
+
+class Theme(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+    practice = models.ForeignKey(
+        Practice, models.DO_NOTHING, blank=True, null=True, related_name="themes"
+    )
+
+    class Meta:
+        managed = False
+        db_table = 'base_theme'
+
+
+class DocLink(models.Model):
+    type = models.TextField()
+    url = models.CharField(max_length=1000)
+    practice = models.ForeignKey(
+        Practice, on_delete=models.CASCADE, related_name="doc_links"
+    )
+
+    class Meta:
+        managed = False
+        db_table = 'base_doclink'
 
 
 class DivisionsInst(models.Model):
@@ -207,14 +219,6 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
-class Faculty(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
-    picture = models.CharField(max_length=1000)
-
-    class Meta:
-        managed = False
-        db_table = 'faculty'
 
 
 class GroupScore(models.Model):

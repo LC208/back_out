@@ -1,8 +1,7 @@
 from rest_framework.serializers import ModelSerializer,CharField,Serializer
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from base.models import DocLink, Practice, Speciality, Theme
-from olddb.models import Companies
+from base.models import DocLink, Practice, Speciality, Theme, Companies
 from olddb.serializers import CompanySerializer
 
 class UserSerializer(ModelSerializer):

@@ -6,7 +6,7 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAdminUser, AllowAny, SAFE_METHODS, BasePermission, IsAuthenticated
 
-from olddb.models import Faculty, Companies
+from base.models import Faculty, Companies
 # from models import Faculty
 from olddb.serializers import CompanySerializer, FacultySerializer
 from base.permissions import ReadOnly

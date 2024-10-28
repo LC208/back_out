@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from base.models import Practice, DocLink, Speciality, Theme
+from base.models import Practice, DocLink, Speciality, Theme, Companies
 from base.serializers import DockLinkSerializer, CompanyFullSerializer
 from base.serializers import (
     PracticeAddSerializer,
@@ -22,7 +22,6 @@ from base.serializers import (
     UserSerializer,
     AuthSerializer,
 )
-from olddb.models import Companies
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -72,7 +71,7 @@ class PracticesList(ListAPIView):
     queryset = Practice.objects.all()
     serializer_class = PracticeListSerializer
     filter_backends = (filters.DjangoFilterBackend,)
-    filterset_fields = ("faculty",)
+    filterset_fields = ("faculty_id",)
 
 
 class PracticeSingleView(RetrieveUpdateDestroyAPIView):

@@ -134,13 +134,12 @@ WSGI_APPLICATION = "out.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("DB_NAME", default="Practices"),
         "USER": os.getenv("DB_USER", default="localhost"),
         "PASSWORD": os.getenv("DB_PASSWORD", default="228322"),
         "HOST": os.getenv("DB_HOST", default="127.0.0.1"),
         "PORT": os.getenv("DB_PORT", default="4000"),
-        'OPTIONS': {'init_command': 'SET default_storage_engine=INNODB'},
     }
 }
 

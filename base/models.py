@@ -2,9 +2,21 @@ from django.db import models
 from olddb.models import Companies, Faculty
 
 
+class AuthsUserprofile(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    bitrix_user_id = models.IntegerField(blank=True, null=True)
+    mira_id = models.IntegerField(blank=True, null=True)
+    is_student = models.BooleanField()
+    is_teacher = models.BooleanField()
+    user_id = models.IntegerField(unique=True)
+
+    class Meta:
+        managed = False
+        db_table = 'auths_userprofile'
+
 class Practice(models.Model):
     name = models.CharField(
-        max_length=255, null=True, db_collation="utf8mb3_general_ci"
+        max_length=255, null=True
     )
     company = models.ForeignKey(
         Companies, on_delete=models.DO_NOTHING, related_name="company"
@@ -19,7 +31,7 @@ class Practice(models.Model):
 
 class Theme(models.Model):
     name = models.CharField(
-        max_length=255, db_collation="utf8mb3_general_ci", blank=True, null=True
+        max_length=255,  blank=True, null=True
     )
     practice = models.ForeignKey(
         Practice, models.DO_NOTHING, blank=True, null=True, related_name="themes"
@@ -42,7 +54,7 @@ class Speciality(models.Model):
         Faculty, on_delete=models.CASCADE, related_name="specialities"
     )
     name = models.CharField(
-        max_length=255, db_collation="utf8mb3_general_ci", blank=True, null=True
+        max_length=255,  blank=True, null=True
     )
 
     def __str__(self) -> str:

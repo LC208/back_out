@@ -101,6 +101,9 @@ class Faculty(models.Model):
     class Meta:
         managed = False
         db_table = 'faculty'
+    
+    def __str__(self):
+        return self.name
 
 class Speciality(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
@@ -112,6 +115,9 @@ class Speciality(models.Model):
         managed = False
         db_table = 'base_speciality'
 
+    def __str__(self):
+        return self.name
+
 
 class Companies(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
@@ -121,6 +127,9 @@ class Companies(models.Model):
     agreements = models.CharField(max_length=255, blank=True, null=True)
     image = models.CharField(max_length=1000, blank=True, null=True)
     user = models.OneToOneField(AuthUser, models.DO_NOTHING, blank=True, null=True)
+
+    def __str__(self):
+        return self.name 
 
     class Meta:
         managed = False
@@ -138,6 +147,8 @@ class Practice(models.Model):
     class Meta:
         managed = False
         db_table = 'base_practice'
+    def __str__(self):
+        return self.name 
 
 class Theme(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
@@ -148,6 +159,8 @@ class Theme(models.Model):
     class Meta:
         managed = False
         db_table = 'base_theme'
+    def __str__(self):
+        return self.name 
 
 
 class DocLink(models.Model):
@@ -160,6 +173,8 @@ class DocLink(models.Model):
     class Meta:
         managed = False
         db_table = 'base_doclink'
+    def __str__(self):
+        return self.name 
 
 
 class DivisionsInst(models.Model):

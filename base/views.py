@@ -71,7 +71,7 @@ class PracticesList(ListAPIView):
     queryset = Practice.objects.all()
     serializer_class = PracticeListSerializer
     filter_backends = (filters.DjangoFilterBackend,)
-    filterset_fields = ("faculty_id",)
+    filterset_fields = ("faculty",)
 
 
 class PracticeSingleView(RetrieveUpdateDestroyAPIView):

@@ -29,6 +29,8 @@ pictures = [
      'Институт лингвистики и межкультурной коммуникации')
     ]
 
+trans = {"46":5, "36":7,"45":2,"69725":16,"38":8,"50":14,"33":1,"34":6,"43":3}
+
 
 class Command(BaseCommand):
     '''
@@ -44,6 +46,8 @@ class Command(BaseCommand):
             groups = list(self.get_uniq_value(mykeys,
                                                 ['abbr', 'facid'],
                                                 reg=r'[.]'))
+
+            groups = [(x[0], trans[str(x[1])]) if str(x[1]) in trans else x for x in groups]
             not_in = list()
             specs = Speciality.objects.all()
             for spec in specs:

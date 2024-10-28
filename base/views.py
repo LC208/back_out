@@ -68,6 +68,7 @@ class PracticeCreateView(CreateAPIView):
 
 
 class PracticesList(ListAPIView):
+    permission_classes=[AllowAny]
     queryset = Practice.objects.all()
     serializer_class = PracticeListSerializer
     filter_backends = (filters.DjangoFilterBackend,)

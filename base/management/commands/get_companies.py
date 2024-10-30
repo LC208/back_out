@@ -82,12 +82,15 @@ class Command(BaseCommand):
             pass_user = self.generate_random_string(8)
             user.append({'username':login_user,'password':pass_user,'is_staff':0})
             #sending data
+            pract = [{"name":names[i],"faculty":5,"links":[{"type":"Веб-сайт","url":urls[i]}]}]
+            if urls[i] is None:
+                pract = [{"name":names[i],"faculty":5}]
             data_set={
             "name": names[i],
             "image":images[i],
             "agreements":agreements[i],
             "users":user[i],
-            "practices":[{"name":names[i],"faculty":5,"links":[{"type":"Веб-сайт","url":urls[i]}]}],}
+            "practices":pract,}
             ser = Company_Serializer(data=data_set)
             if ser.is_valid():
                 ser.save()

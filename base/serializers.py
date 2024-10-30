@@ -76,13 +76,25 @@ class PracticeSerializer(ModelSerializer):
         model = Practice
         fields = "__all__"
 
+class DockLinkTestSerializer(ModelSerializer):
+    practice = serializers.IntegerField(read_only=True)
+    class Meta:
+        model = DocLink
+        fields = "__all__"
+
+class PracticeTestSerializer(ModelSerializer):
+    company = CharField(required=False)
+    links = DockLinkTestSerializer(many=True, required=False)
+    class Meta:
+        model = Practice
+        fields = "__all__"
+
 class Company_Serializer(serializers.ModelSerializer):
-    practices = PracticeSerializer(many=True, required=False)
-    links = DockLinkSerializer(many=True, required=False)
+    practices = PracticeTestSerializer(many=True, required=False)
     users = UserSerializer(required=False)
     class Meta:
         model = Companies
-        fields = ['name','image','agreements','practices','users', 'links']
+        fields = ['name','image','agreements','practices','users']
 
     def create(self, validated_data):
         practices_data = validated_data.pop('practices', [])
@@ -93,8 +105,8 @@ class Company_Serializer(serializers.ModelSerializer):
         company = Companies.objects.create(user=user,**validated_data)
         for practice_data in practices_data:
             practice_data["company"]=company
-            prac = Practice.objects.create( **practice_data)
             links_data = practice_data.pop('links', [])
+            prac = Practice.objects.create( **practice_data)
             for link_data in links_data:
                 DocLink.objects.create(practice=prac, **link_data)
         return company

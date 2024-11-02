@@ -41,6 +41,7 @@ class Companies(models.Model):
     agreements = models.CharField(max_length=255, blank=True, null=True)
     image = models.CharField(max_length=1000, blank=True, null=True)
     user = models.OneToOneField(User, models.DO_NOTHING, blank=True, null=True)
+    area_of_activity = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name 
@@ -48,6 +49,15 @@ class Companies(models.Model):
     class Meta:
         managed = False
         db_table = 'companies'
+
+class CompanyRepresentativeProfile(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    job_title = models.CharField(max_length=512, blank=True, null=True)
+    user = models.OneToOneField(User, models.DO_NOTHING, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'models_collect_companyrepresentativeprofile'
 
 class Practice(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)

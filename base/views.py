@@ -42,10 +42,6 @@ class SpecilityCreateView(CreateAPIView):
     serializer_class = SpecialitySerializer
 
 
-class CompanyFullListView(ListAPIView):
-    permission_classes = [AllowAny]
-    queryset = Companies.objects.all()
-    serializer_class = CompanyFullSerializer
 
 
 class SpecialityList(ListAPIView):

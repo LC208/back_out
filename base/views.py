@@ -213,4 +213,5 @@ class CompamySingleViewByToken(APIView):
                          'last_name':user_selected.last_name,
                          'company_name':compamy_selected.name,
                          'company_image':compamy_selected.image,
+                         'company_area':compamy_selected.area_of_activity,
                          },status=200)

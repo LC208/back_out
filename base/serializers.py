@@ -1,3 +1,6 @@
+import this
+
+from attr.filters import exclude
 from rest_framework.serializers import ModelSerializer,CharField,Serializer
 from rest_framework import serializers
 from django.contrib.auth.models import User
@@ -117,3 +120,13 @@ class CompanyFullSerializer(ModelSerializer):
     class Meta:
         model = Companies
         fields = "__all__"
+
+class CompanyEditSerializer(Company_Serializer):
+    practices = PracticeTestSerializer(many=True, required=False)
+    users = UserSerializer(required=False)
+    class Meta:
+        model = Companies
+        exclude = ['user','themes','dbegin','dend','agreements']
+
+
+

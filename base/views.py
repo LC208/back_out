@@ -1,4 +1,6 @@
-from rest_framework import status
+from os import access
+
+from rest_framework import status, serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django_filters import rest_framework as filters
@@ -13,7 +15,7 @@ from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from base.models import Practice, DocLink, Speciality, Theme, Companies
-from base.serializers import DockLinkSerializer, CompanyFullSerializer
+from base.serializers import DockLinkSerializer, Company_Serializer, CompanyEditSerializer
 from base.serializers import (
     PracticeAddSerializer,
     PracticeListSerializer,
@@ -190,7 +192,7 @@ class CookieTokenRefreshView(TokenRefreshView):
         except Exception:
             return Response({'error': 'Refresh token blacklisted'},status=status.HTTP_400_BAD_REQUEST)
 
-class CompamySingleViewByToken(APIView):
+class CompanySingleViewByToken(APIView):
     @extend_schema(
         request=None,
         responses=None
@@ -199,19 +201,38 @@ class CompamySingleViewByToken(APIView):
         user_selected = User.objects.get(id=request.user.id)
         if user_selected is None:
             return Response({'error': 'User not found'},status=401)
-        compamy_selected = Companies.objects.filter(user=request.user.id)
-        if len(compamy_selected) == 0:
+        company_selected = Companies.objects.filter(user=request.user.id)
+        if len(company_selected) == 0:
             return Response({'username': user_selected.username,
                          'email':user_selected.email,
                          'first_name':user_selected.first_name,
                          'last_name':user_selected.last_name,
                          },status=200)
-        compamy_selected = compamy_selected.get(user=request.user.id)
+        company_selected = company_selected.get(user=request.user.id)
         return Response({'username': user_selected.username,
                          'email':user_selected.email,
                          'first_name':user_selected.first_name,
                          'last_name':user_selected.last_name,
-                         'company_name':compamy_selected.name,
-                         'company_image':compamy_selected.image,
-                         'company_area':compamy_selected.area_of_activity,
+                         'company_name':company_selected.name,
+                         'company_image':company_selected.image,
+                         'area_of_activity':company_selected.area_of_activity,
                          },status=200)
+
+    @extend_schema(
+        request=CompanyEditSerializer,
+        responses=None
+    )
+    def patch(self, request):
+        refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE'])
+        if not refresh_token:
+            return Response({'error':'Required refresh token'},status=status.HTTP_400_BAD_REQUEST)
+        try:
+            token = RefreshToken(refresh_token)
+        except Exception as e:
+            return Response({'error': 'Invalid Refresh token'},status=status.HTTP_400_BAD_REQUEST)
+        company_selected = Companies.objects.filter(user=request.user.id)
+        if len(company_selected) == 0:
+            user_data = request.data.get('users', {})
+            User.objects.filter(id=request.user.id).update(**user_data)
+            return Response(status=200)
+        return Response(status=200)

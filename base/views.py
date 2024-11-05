@@ -14,8 +14,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from base.models import Practice, DocLink, Speciality, Theme, Companies
-from base.serializers import DockLinkSerializer, Company_Serializer, CompanyEditSerializer
+from base.models import Practice, DocLink, Speciality, Theme, Companies, CompanyRepresentativeProfile
+from base.serializers import DockLinkSerializer, UserEditSerializer
 from base.serializers import (
     PracticeAddSerializer,
     PracticeListSerializer,
@@ -198,28 +198,29 @@ class CompanySingleViewByToken(APIView):
         responses=None
     )
     def post(self,request):
+        data_output = {}
         user_selected = User.objects.get(id=request.user.id)
         if user_selected is None:
             return Response({'error': 'User not found'},status=401)
+        data_output = data_output|{'username': user_selected.username,
+                         'email':user_selected.email,
+                         'first_name':user_selected.first_name,
+                         'last_name':user_selected.last_name,
+                         }
         company_selected = Companies.objects.filter(user=request.user.id)
-        if len(company_selected) == 0:
-            return Response({'username': user_selected.username,
-                         'email':user_selected.email,
-                         'first_name':user_selected.first_name,
-                         'last_name':user_selected.last_name,
-                         },status=200)
-        company_selected = company_selected.get(user=request.user.id)
-        return Response({'username': user_selected.username,
-                         'email':user_selected.email,
-                         'first_name':user_selected.first_name,
-                         'last_name':user_selected.last_name,
-                         'company_name':company_selected.name,
-                         'company_image':company_selected.image,
-                         'area_of_activity':company_selected.area_of_activity,
-                         },status=200)
-
+        if company_selected.exists():
+            company_selected = Companies.objects.get(user=request.user.id)
+            data_output = data_output|{'company_name': company_selected.name,
+                         'company_image': company_selected.image,
+                         'area_of_activity': company_selected.area_of_activity,
+                         }
+        company_representative_profile_selected = CompanyRepresentativeProfile.objects.filter(user=request.user.id)
+        if company_representative_profile_selected.exists():
+            company_representative_profile_selected = CompanyRepresentativeProfile.objects.get(user=request.user.id)
+            data_output = data_output|{'job_title':company_representative_profile_selected.job_title,}
+        return Response(data=data_output,status=200)
     @extend_schema(
-        request=CompanyEditSerializer,
+        request=UserEditSerializer,
         responses=None
     )
     def patch(self, request):
@@ -231,8 +232,14 @@ class CompanySingleViewByToken(APIView):
         except Exception as e:
             return Response({'error': 'Invalid Refresh token'},status=status.HTTP_400_BAD_REQUEST)
         company_selected = Companies.objects.filter(user=request.user.id)
-        if len(company_selected) == 0:
+        if not company_selected.exists():
             user_data = request.data.get('users', {})
             User.objects.filter(id=request.user.id).update(**user_data)
             return Response(status=200)
+        company_data = request.data.get('company',{})
+        Companies.objects.filter(user=request.user.id).update(**company_data)
+        company_profile_selected = CompanyRepresentativeProfile.objects.filter(user=request.user.id)
+        if company_profile_selected.exists():
+            company_profile_data = request.data.get('company_representative_profile',{})
+            CompanyRepresentativeProfile.objects.filter(user=request.user.id).update(**company_profile_data)
         return Response(status=200)

@@ -4,7 +4,7 @@ from attr.filters import exclude
 from rest_framework.serializers import ModelSerializer,CharField,Serializer
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from base.models import DocLink, Practice, Speciality, Theme, Companies
+from base.models import DocLink, Practice, Speciality, Theme, Companies, CompanyRepresentativeProfile
 from olddb.serializers import CompanySerializer
 
 class UserSerializer(ModelSerializer):
@@ -92,7 +92,7 @@ class PracticeTestSerializer(ModelSerializer):
         model = Practice
         fields = "__all__"
 
-class Company_Serializer(serializers.ModelSerializer):
+class CompanyPracticeDocLinkSerializer(serializers.ModelSerializer):
     practices = PracticeTestSerializer(many=True, required=False)
     users = UserSerializer(required=False)
     class Meta:
@@ -121,12 +121,19 @@ class CompanyFullSerializer(ModelSerializer):
         model = Companies
         fields = "__all__"
 
-class CompanyEditSerializer(Company_Serializer):
-    practices = PracticeTestSerializer(many=True, required=False)
-    users = UserSerializer(required=False)
+class CompanyRepresentativeProfileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Companies
-        exclude = ['user','themes','dbegin','dend','agreements']
+        model = CompanyRepresentativeProfile
+        fields = "__all__"
+
+class UserEditSerializer(serializers.Serializer):
+    users = UserSerializer(required=False)
+    users.Meta.fields = ["username","email","first_name","last_name"]
+    company = CompanySerializer(required=False)
+    company.Meta.fields = ["name","image","area_of_activity"]
+    company_representative_profile = CompanyRepresentativeProfileSerializer(required=False)
+    company_representative_profile.Meta.fields = None
+    company_representative_profile.Meta.exclude = ['id','user']
 
 
 

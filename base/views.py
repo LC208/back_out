@@ -198,11 +198,10 @@ class CompanySingleViewByToken(APIView):
         responses=None
     )
     def post(self,request):
-        data_output = {}
         user_selected = User.objects.get(id=request.user.id)
         if user_selected is None:
             return Response({'error': 'User not found'},status=401)
-        data_output = data_output|{'username': user_selected.username,
+        data_output = {'username': user_selected.username,
                          'email':user_selected.email,
                          'first_name':user_selected.first_name,
                          'last_name':user_selected.last_name,
@@ -224,13 +223,6 @@ class CompanySingleViewByToken(APIView):
         responses=None
     )
     def patch(self, request):
-        refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE'])
-        if not refresh_token:
-            return Response({'error':'Required refresh token'},status=status.HTTP_400_BAD_REQUEST)
-        try:
-            token = RefreshToken(refresh_token)
-        except Exception as e:
-            return Response({'error': 'Invalid Refresh token'},status=status.HTTP_400_BAD_REQUEST)
         company_selected = Companies.objects.filter(user=request.user.id)
         if not company_selected.exists():
             user_data = request.data.get('users', {})

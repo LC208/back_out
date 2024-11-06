@@ -223,15 +223,18 @@ class CompanySingleViewByToken(APIView):
         responses=None
     )
     def patch(self, request):
+        user_data = request.data.get('users')
+        User.objects.filter(id=request.user.id).update(**user_data)
         company_selected = Companies.objects.filter(user=request.user.id)
-        if not company_selected.exists():
-            user_data = request.data.get('users', {})
-            User.objects.filter(id=request.user.id).update(**user_data)
-            return Response(status=200)
-        company_data = request.data.get('company',{})
-        Companies.objects.filter(user=request.user.id).update(**company_data)
+        if company_selected.exists() and 'company' in request.data:
+            company_data = request.data.get('company')
+            Companies.objects.filter(user=request.user.id).update(**company_data)
+        elif not company_selected.exists():
+            return Response(status=404)
         company_profile_selected = CompanyRepresentativeProfile.objects.filter(user=request.user.id)
-        if company_profile_selected.exists():
-            company_profile_data = request.data.get('company_representative_profile',{})
+        if company_profile_selected.exists() and 'company_representative_profile' in request.data:
+            company_profile_data = request.data.get('company_representative_profile')
             CompanyRepresentativeProfile.objects.filter(user=request.user.id).update(**company_profile_data)
+        elif not company_profile_selected.exists():
+            return Response(status=404)
         return Response(status=200)

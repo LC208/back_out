@@ -201,7 +201,8 @@ class CompanySingleViewByToken(APIView):
         user_selected = User.objects.get(id=request.user.id)
         if user_selected is None:
             return Response({'error': 'User not found'},status=401)
-        data_output = {'username': user_selected.username,
+        data_output = {  'user_id':user_selected.id,
+                         'username': user_selected.username,
                          'email':user_selected.email,
                          'first_name':user_selected.first_name,
                          'last_name':user_selected.last_name,
@@ -209,10 +210,29 @@ class CompanySingleViewByToken(APIView):
         company_selected = Companies.objects.filter(user=request.user.id)
         if company_selected.exists():
             company_selected = Companies.objects.get(user=request.user.id)
-            data_output = data_output|{'company_name': company_selected.name,
+            all_practics = []
+            all_practics_dir = {}
+            all_docs_dir = {}
+            #нахождение всех практик
+            for practica in Practice.objects.all():
+                if practica.company.id == company_selected.id:
+                    all_practics.append(practica)
+            for p in all_practics:
+                all_practics_dir.update({'practice_id':p.id,'practice_name':p.name,'practice_faculty':p.faculty.id})
+            #нахождение всех доклинков, при условии сущестовании практик
+            if all_practics:
+                all_docs = []
+                for pract in all_practics:
+                    for doc in DocLink.objects.all():
+                        if doc.practice.id == pract.id:
+                            all_docs.append(doc)
+                for d in all_docs:
+                    all_docs_dir.update({'doclink_id':d.id,'doclink_type':d.type,'doclink_url':d.url})
+            data_output = data_output|{'company_id':company_selected.id,
+                        'company_name': company_selected.name,
                          'company_image': company_selected.image,
                          'area_of_activity': company_selected.area_of_activity,
-                         }
+                         }|all_practics_dir|all_docs_dir
         company_representative_profile_selected = CompanyRepresentativeProfile.objects.filter(user=request.user.id)
         if company_representative_profile_selected.exists():
             company_representative_profile_selected = CompanyRepresentativeProfile.objects.get(user=request.user.id)

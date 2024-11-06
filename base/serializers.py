@@ -74,7 +74,6 @@ class PracticeListSerializer(ModelSerializer):
         fields = "__all__"
 
 class PracticeSerializer(ModelSerializer):
-    company = CharField(required=False)
     class Meta:
         model = Practice
         fields = "__all__"
@@ -135,5 +134,13 @@ class UserEditSerializer(serializers.Serializer):
     company_representative_profile.Meta.fields = None
     company_representative_profile.Meta.exclude = ['id','user']
 
-
-
+class UserProfileEditSerializer(serializers.Serializer):
+    practice_id = serializers.IntegerField(required=False)
+    doclink_id = serializers.IntegerField(required=False)
+    practices = PracticeTestSerializer(required=False)
+    company = CompanySerializer(required=False)
+    users = UserSerializer(required=False)
+    company_representative_profile = CompanyRepresentativeProfileSerializer(required=False)
+    def __init__(self, *args, **kwargs):#удаление лишнего поля company из practice
+        super().__init__(*args, **kwargs)
+        self.fields['practices'].fields.pop('company', None)

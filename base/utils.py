@@ -1,15 +1,21 @@
 from rest_framework.response import Response
 
 
-def validate(model, request, field_name, index):
-    model_selected = model.objects.filter(user = index)
+def validate(model, request, field_name, **filters):
+    model_selected = model.objects.filter(**filters)
     if model_selected.exists() and field_name in request.data:
         model_data = request.data.get(field_name)
-        model.objects.filter(user = index).update(**model_data)
+        model.objects.filter(**filters).update(**model_data)
     elif not model_selected.exists() and field_name in request.data:
-        return [False,Response( str(model)+" not found", status=404)]
-    return [True,None]
+        return Response( str(model)+" not found", status=404)
+    elif field_name not in request.data:
+        return None
+    return [model,*filters,model_data]
 
+def model_update(data):
+    if data is None:
+        return
+    data[0].objects.filter(*data[1]).update(**data[2])
 
 class Utils:
     pass

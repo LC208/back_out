@@ -32,8 +32,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from django.conf import settings
 from drf_spectacular.utils import extend_schema
 
-from base.utils import validate
-
+from base.utils import validate, model_update
 
 
 # Create your views here.
@@ -245,28 +244,37 @@ class CompanySingleViewByToken(APIView):
     )
     def patch(self, request):
         user_data = request.data.get('users',{})
-        User.objects.filter(id=request.user.id).update(**user_data)
+        is_company_valid = validate(Companies,request,'company',user=request.user.id)
+        if isinstance(is_company_valid, Response):
+            return is_company_valid
 
-        if not validate(Companies,request,'company',request.user.id)[0]:
-            return validate(Companies,request,'company',request.user.id)[1]
-
-        if not validate(CompanyRepresentativeProfile,request,'company_representative_profile',request.user.id)[0]:
-            return validate(CompanyRepresentativeProfile,request,'company_representative_profile',request.user.id)[1]
+        is_profile_valid = validate(CompanyRepresentativeProfile,request,'company_representative_profile',user=request.user.id)
+        if isinstance(is_profile_valid, Response):
+            return is_profile_valid
 
         practice_selected = Practice.objects.filter(id=request.data['practice_id'])
         if practice_selected.exists() and 'practice_id' in request.data:
             practice_data = request.data.get('practices',{})
+            is_practice_valid = [Practice,{'id':request.data['practice_id']},practice_data]
             doclink_selected = DocLink.objects.filter(id=request.data['doclink_id'])#объект doclink
             if doclink_selected.exists() and 'doclink_id' in request.data:
                 doclink_data = practice_data.get('links',{})[0]
-                DocLink.objects.filter(id=request.data['doclink_id']).update(**doclink_data)
+                is_doclink_valid = [DocLink,{'id':request.data['doclink_id']},doclink_data]
             elif not doclink_selected.exists() and 'doclink_id' in request.data:
                 return Response("Doclink not found", status=404)
+            elif doclink_selected.exists() and 'doclink_id' not in request.data:
+                is_doclink_valid = None
             practice_data.pop('links')
             faculty_select = Faculty.objects.filter(id=practice_data['faculty'])
             if not faculty_select.exists() and 'faculty' in practice_data:
                 return Response("Faculty not found", status=404)
-            Practice.objects.filter(id=request.data['practice_id']).update(**practice_data)
         elif not practice_selected.exists() and 'practice_id' in request.data:
             return Response("Practice not found", status=404)
+        elif practice_selected.exists() and 'practice_id' not in request.data:
+            is_practice_valid = None
+        model_update([User,{'id':request.user.id},user_data])
+        model_update(is_company_valid)
+        model_update(is_profile_valid)
+        model_update(is_practice_valid)
+        model_update(is_doclink_valid)
         return Response(status=200)

@@ -244,30 +244,32 @@ class CompanySingleViewByToken(APIView):
     )
     def patch(self, request):
         user_data = request.data.get('users',{})
-        is_company_valid = validate(Companies,request,'company',user=request.user.id)
+        is_practice_valid = None
+        is_doclink_valid = None
+        is_company_valid = validate(Companies,request,'company',{'user':request.user.id})
         if isinstance(is_company_valid, Response):
             return is_company_valid
 
-        is_profile_valid = validate(CompanyRepresentativeProfile,request,'company_representative_profile',user=request.user.id)
+        is_profile_valid = validate(CompanyRepresentativeProfile,request,'company_representative_profile',{'user':request.user.id})
         if isinstance(is_profile_valid, Response):
             return is_profile_valid
 
         practice_selected = Practice.objects.filter(id=request.data['practice_id'])
-        if practice_selected.exists() and 'practice_id' in request.data:
+        if practice_selected.exists() and 'practice_id' in request.data and 'practices' in request.data:
             practice_data = request.data.get('practices',{})
             is_practice_valid = [Practice,{'id':request.data['practice_id']},practice_data]
-            doclink_selected = DocLink.objects.filter(id=request.data['doclink_id'])#объект doclink
-            if doclink_selected.exists() and 'doclink_id' in request.data:
+            doclink_selected = DocLink.objects.filter(id=request.data['doclink_id'])
+            if doclink_selected.exists() and 'doclink_id' in request.data and 'links' in practice_data:
                 doclink_data = practice_data.get('links',{})[0]
                 is_doclink_valid = [DocLink,{'id':request.data['doclink_id']},doclink_data]
             elif not doclink_selected.exists() and 'doclink_id' in request.data:
                 return Response("Doclink not found", status=404)
             elif doclink_selected.exists() and 'doclink_id' not in request.data:
                 is_doclink_valid = None
-            practice_data.pop('links')
             faculty_select = Faculty.objects.filter(id=practice_data['faculty'])
             if not faculty_select.exists() and 'faculty' in practice_data:
                 return Response("Faculty not found", status=404)
+            practice_data.pop('links') if 'links' in practice_data else None
         elif not practice_selected.exists() and 'practice_id' in request.data:
             return Response("Practice not found", status=404)
         elif practice_selected.exists() and 'practice_id' not in request.data:

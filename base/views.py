@@ -194,36 +194,6 @@ class CookieTokenRefreshView(TokenRefreshView):
             return Response({'error': 'Refresh token blacklisted'},status=status.HTTP_400_BAD_REQUEST)
 
 class CompanySingleViewByToken(APIView):
-    # @extend_schema(
-    #     request=None,
-    #     responses=None
-    # )
-    # def post(self,request):
-    #     user_selected = User.objects.get(id=request.user.id)
-    #     if user_selected is None:
-    #         return Response({'error': 'User not found'},status=401)
-    #     data_output = {  'user_id':user_selected.id,
-    #                      'username': user_selected.username,
-    #                      'email':user_selected.email,
-    #                      'first_name':user_selected.first_name,
-    #                      'last_name':user_selected.last_name,
-    #                      }
-    #     company_selected = Companies.objects.filter(user=request.user.id)
-    #     if len(company_selected) == 1:
-    #         company_selected = company_selected[0]
-    #         all_practics_dir = Practice.objects.filter(company=company_selected.id)
-    #         data_output = data_output|{'company_id':company_selected.id,
-    #                     'company_name': company_selected.name,
-    #                      'company_image': company_selected.image,
-    #                      'area_of_activity': company_selected.area_of_activity,
-    #                      'practices':PracticeListSerializer(all_practics_dir,many=True,exclude=['company']).data
-    #                      }
-    #     company_representative_profile_selected = CompanyRepresentativeProfile.objects.filter(user=request.user.id)
-    #     if len(company_representative_profile_selected) == 1:
-    #         company_representative_profile_selected = company_representative_profile_selected[0]
-    #         data_output = data_output|{'job_title':company_representative_profile_selected.job_title,}
-    #     return Response(data=data_output,status=200)
-
     @extend_schema(
         request=None,
         responses=UserProfileEditSerializer()

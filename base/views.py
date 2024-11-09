@@ -229,6 +229,6 @@ class CompanySingleViewByToken(APIView):
         company_selected = Companies.objects.filter(user=request.user.id)
         out = list(chain(inst, company_selected, Practice.objects.filter(company=company_selected[0].id), CompanyRepresentativeProfile.objects.filter(user=request.user.id)))
         serializer = UserProfileEditSerializer(out,data=request.data,partial=True)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.save() 
         return Response(status=200)

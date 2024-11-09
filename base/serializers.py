@@ -4,7 +4,7 @@ from attr.filters import exclude
 from rest_framework.serializers import ModelSerializer,CharField,Serializer
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from base.models import DocLink, Practice, Speciality, Theme, Companies, CompanyRepresentativeProfile
+from base.models import DocLink, Practice, Speciality, Theme, Companies, CompanyRepresentativeProfile,Faculty
 from olddb.serializers import CompanySerializer
 
 class UserSerializer(ModelSerializer):
@@ -175,7 +175,6 @@ class UserProfileEditSerializer(serializers.Serializer):
     user = UserTrimmedSerializer(required=False,partial=True)
     company_representative_profile = CompanyRepresentativeProfileSerializer(required=False,partial=True)
 
-
     def update(self, instances, validated_data):
         for instance in instances:
             # Обработка и обновление User
@@ -204,7 +203,7 @@ class UserProfileEditSerializer(serializers.Serializer):
                             
                             doc_links_data = practice_data.pop('doc_links', [])
                             themes_data = practice_data.pop('themes', [])
-
+                            practice_data['faculty'] = practice_data['faculty'].id
 
                             for doc_link_data in doc_links_data:
                                 doc_id = doc_link_data.pop('id')

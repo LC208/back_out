@@ -23,6 +23,7 @@ from base.serializers import (
     SpecialitySerializer,
     UserSerializer,
     AuthSerializer,
+    PracticeSerializer,
 )
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -32,7 +33,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from django.conf import settings
 from drf_spectacular.utils import extend_schema
 
-from base.utils import validate, model_update
+from itertools import chain
 
 
 # Create your views here.
@@ -193,90 +194,71 @@ class CookieTokenRefreshView(TokenRefreshView):
             return Response({'error': 'Refresh token blacklisted'},status=status.HTTP_400_BAD_REQUEST)
 
 class CompanySingleViewByToken(APIView):
+    # @extend_schema(
+    #     request=None,
+    #     responses=None
+    # )
+    # def post(self,request):
+    #     user_selected = User.objects.get(id=request.user.id)
+    #     if user_selected is None:
+    #         return Response({'error': 'User not found'},status=401)
+    #     data_output = {  'user_id':user_selected.id,
+    #                      'username': user_selected.username,
+    #                      'email':user_selected.email,
+    #                      'first_name':user_selected.first_name,
+    #                      'last_name':user_selected.last_name,
+    #                      }
+    #     company_selected = Companies.objects.filter(user=request.user.id)
+    #     if len(company_selected) == 1:
+    #         company_selected = company_selected[0]
+    #         all_practics_dir = Practice.objects.filter(company=company_selected.id)
+    #         data_output = data_output|{'company_id':company_selected.id,
+    #                     'company_name': company_selected.name,
+    #                      'company_image': company_selected.image,
+    #                      'area_of_activity': company_selected.area_of_activity,
+    #                      'practices':PracticeListSerializer(all_practics_dir,many=True,exclude=['company']).data
+    #                      }
+    #     company_representative_profile_selected = CompanyRepresentativeProfile.objects.filter(user=request.user.id)
+    #     if len(company_representative_profile_selected) == 1:
+    #         company_representative_profile_selected = company_representative_profile_selected[0]
+    #         data_output = data_output|{'job_title':company_representative_profile_selected.job_title,}
+    #     return Response(data=data_output,status=200)
+
     @extend_schema(
         request=None,
-        responses=None
+        responses=UserProfileEditSerializer()
     )
-    def post(self,request):
-        user_selected = User.objects.get(id=request.user.id)
+    def post(self, request):
+        inp = {}
+        user_selected = User.objects.filter(id=request.user.id)
         if user_selected is None:
             return Response({'error': 'User not found'},status=401)
-        data_output = {  'user_id':user_selected.id,
-                         'username': user_selected.username,
-                         'email':user_selected.email,
-                         'first_name':user_selected.first_name,
-                         'last_name':user_selected.last_name,
-                         }
+        inp = inp | {'user' : user_selected[0]}
         company_selected = Companies.objects.filter(user=request.user.id)
-        if company_selected.exists():
-            company_selected = Companies.objects.get(user=request.user.id)
-            all_practics = []
-            all_practics_dir = {}
-            all_docs_dir = {}
-            #нахождение всех практик
-            for practica in Practice.objects.all():
-                if practica.company.id == company_selected.id:
-                    all_practics.append(practica)
-            for p in all_practics:
-                all_practics_dir.update({'practice_id':p.id,'practice_name':p.name,'practice_faculty':p.faculty.id})
-            #нахождение всех доклинков, при условии сущестовании практик
-            if all_practics:
-                all_docs = []
-                for pract in all_practics:
-                    for doc in DocLink.objects.all():
-                        if doc.practice.id == pract.id:
-                            all_docs.append(doc)
-                for d in all_docs:
-                    all_docs_dir.update({'doclink_id':d.id,'doclink_type':d.type,'doclink_url':d.url})
-            data_output = data_output|{'company_id':company_selected.id,
-                        'company_name': company_selected.name,
-                         'company_image': company_selected.image,
-                         'area_of_activity': company_selected.area_of_activity,
-                         }|all_practics_dir|all_docs_dir
-        company_representative_profile_selected = CompanyRepresentativeProfile.objects.filter(user=request.user.id)
-        if company_representative_profile_selected.exists():
-            company_representative_profile_selected = CompanyRepresentativeProfile.objects.get(user=request.user.id)
-            data_output = data_output|{'job_title':company_representative_profile_selected.job_title,}
-        return Response(data=data_output,status=200)
+        if len(company_selected) == 1:
+            inp = inp | {'company' : company_selected[0]}
+        practices_selected = Practice.objects.filter(company=company_selected[0].id)
+        if len(practices_selected) > 0:
+            inp = inp | {'practices' : practices_selected}
+        crp_selected = CompanyRepresentativeProfile.objects.filter(user=request.user.id)
+        if len(crp_selected) == 1:
+            inp = inp | {'company_representative_profile' : crp_selected[0]}
+        serializer = UserProfileEditSerializer(inp)
+        return Response(serializer.data,200)
     @extend_schema(
-        request=UserProfileEditSerializer,
+        request=UserProfileEditSerializer(),
         responses=None
     )
     def patch(self, request):
-        user_data = request.data.get('users',{})
-        is_practice_valid = None
-        is_doclink_valid = None
-        is_company_valid = validate(Companies,request,'company',{'user':request.user.id})
-        if isinstance(is_company_valid, Response):
-            return is_company_valid
-
-        is_profile_valid = validate(CompanyRepresentativeProfile,request,'company_representative_profile',{'user':request.user.id})
-        if isinstance(is_profile_valid, Response):
-            return is_profile_valid
-
-        practice_selected = Practice.objects.filter(id=request.data['practice_id'])
-        if practice_selected.exists() and 'practice_id' in request.data and 'practices' in request.data:
-            practice_data = request.data.get('practices',{})
-            is_practice_valid = [Practice,{'id':request.data['practice_id']},practice_data]
-            doclink_selected = DocLink.objects.filter(id=request.data['doclink_id'])
-            if doclink_selected.exists() and 'doclink_id' in request.data and 'links' in practice_data:
-                doclink_data = practice_data.get('links',{})[0]
-                is_doclink_valid = [DocLink,{'id':request.data['doclink_id']},doclink_data]
-            elif not doclink_selected.exists() and 'doclink_id' in request.data:
-                return Response("Doclink not found", status=404)
-            elif doclink_selected.exists() and 'doclink_id' not in request.data:
-                is_doclink_valid = None
-            faculty_select = Faculty.objects.filter(id=practice_data['faculty'])
-            if not faculty_select.exists() and 'faculty' in practice_data:
-                return Response("Faculty not found", status=404)
-            practice_data.pop('links') if 'links' in practice_data else None
-        elif not practice_selected.exists() and 'practice_id' in request.data:
-            return Response("Practice not found", status=404)
-        elif practice_selected.exists() and 'practice_id' not in request.data:
-            is_practice_valid = None
-        model_update([User,{'id':request.user.id},user_data])
-        model_update(is_company_valid)
-        model_update(is_profile_valid)
-        model_update(is_practice_valid)
-        model_update(is_doclink_valid)
+        refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE'])
+        if not refresh_token:
+            raise AuthenticationFailed('Refresh token not found in cookies.')
+        inst = User.objects.filter(id=request.user.id)
+        if inst is None:
+            return Response({'error': 'User not found'},status=401)
+        company_selected = Companies.objects.filter(user=request.user.id)
+        out = list(chain(inst, company_selected, Practice.objects.filter(company=company_selected[0].id), CompanyRepresentativeProfile.objects.filter(user=request.user.id)))
+        serializer = UserProfileEditSerializer(out,data=request.data,partial=True)
+        if serializer.is_valid():
+            serializer.save() 
         return Response(status=200)

@@ -146,7 +146,7 @@ class UserLogOutView(GenericAPIView):
             token.blacklist()
         except Exception as e:
             return Response({'error': 'Invalid Refresh token'},status=status.HTTP_400_BAD_REQUEST)
-        return Response ({'success':'Success log out'},status=status.HTTP_200_OK)
+        return Response (status=status.HTTP_200_OK)
 
 
 class CookieTokenRefreshView(TokenRefreshView):
@@ -202,7 +202,7 @@ class CompanySingleViewByToken(APIView):
         inp = {}
         user_selected = User.objects.filter(id=request.user.id)
         if user_selected is None:
-            return Response({'error': 'User not found'},status=401)
+            return Response({'error': 'User not found'},status=status.HTTP_401_UNAUTHORIZED)
         inp = inp | {'user' : user_selected[0]}
         company_selected = Companies.objects.filter(user=request.user.id)
         if len(company_selected) == 1:
@@ -214,7 +214,7 @@ class CompanySingleViewByToken(APIView):
         if len(crp_selected) == 1:
             inp = inp | {'company_representative_profile' : crp_selected[0]}
         serializer = UserProfileEditSerializer(inp)
-        return Response(serializer.data,200)
+        return Response(serializer.data,status=status.HTTP_200_OK)
     @extend_schema(
         request=UserProfileEditSerializer(),
         responses=None
@@ -231,4 +231,4 @@ class CompanySingleViewByToken(APIView):
         serializer = UserProfileEditSerializer(out,data=request.data,partial=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save() 
-        return Response(status=200)
+        return Response(status=status.HTTP_200_OK)

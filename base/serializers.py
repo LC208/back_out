@@ -51,11 +51,52 @@ class PracticeAddSerializer(ModelSerializer):
         model = Practice
         fields = "__all__"
 
-class SpecialitySerializer(ModelSerializer):
+
+
+class SpecialityListSerializer(serializers.ListSerializer):
+    
+    def update(self, instance, validated_data):
+        item_mapping = {item.id: item for item in instance}
+        data_mapping = {item_data['id']: item_data for item_data in validated_data if 'id' in item_data}
+
+        updated_items = []
+        created_items = []
+        existing_ids = set(item_mapping.keys())
+
+        for item_data in validated_data:
+            item_id = item_data.get('id', None)
+            if item_id and item_id in item_mapping:
+                item = item_mapping[item_id]
+                for attr, value in item_data.items():
+                    setattr(item, attr, value)
+                updated_items.append(item)
+            else:
+                created_items.append(Speciality(**item_data))
+
+        print(updated_items)
+        print(created_items)
+        Speciality.objects.bulk_update(updated_items, fields=['code', 'faculty', 'education_level', 'full_name'])
+
+        if created_items:
+            Speciality.objects.bulk_create(created_items)
+
+        return instance
 
     class Meta:
         model = Speciality
         fields = "__all__"
+
+class SpecialitySerializer(ModelSerializer):
+    id = serializers.IntegerField(required=False)
+
+    class Meta:
+        model = Speciality
+        fields = "__all__"
+        list_serializer_class=SpecialityListSerializer
+
+
+
+
 
 class ThemeSerializer(ModelSerializer):
 

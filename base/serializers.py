@@ -73,8 +73,6 @@ class SpecialityListSerializer(serializers.ListSerializer):
             else:
                 created_items.append(Speciality(**item_data))
 
-        print(updated_items)
-        print(created_items)
         Speciality.objects.bulk_update(updated_items, fields=['code', 'faculty', 'education_level', 'full_name'])
 
         if created_items:

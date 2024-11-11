@@ -31,11 +31,7 @@ pictures = [
     ]
 
 trans = {"46":5, "36":7,"45":2,"69725":16,"38":8,"50":14,"33":1,"34":6,"43":3}
-trans_el = {1:Speciality.EducationLevel.SPECIALITY[0],
-            2:Speciality.EducationLevel.BACHELOR[0],
-            3:Speciality.EducationLevel.MASTER[0],
-            4:Speciality.EducationLevel.SPO[0],
-            5:Speciality.EducationLevel.GRADUATE[0]}
+trans_el = [1,2,3,4,5]
 
 class Command(BaseCommand):
     '''
@@ -52,7 +48,7 @@ class Command(BaseCommand):
                                                 ['abbr', 'facid','cadmkind','direct_name'],
                                                 reg=r'[.]'))
 
-            groups = [(x[0].strip(), trans[str(x[1])], trans_el[x[2]], x[3].strip()) for x in groups if str(x[1]) in trans and x[2] in trans_el ]
+            groups = [(x[0].strip(), trans[str(x[1])], x[2], x[3].strip()) for x in groups if str(x[1]) in trans and x[2] in trans_el ]
             not_in = list()
             specs = Speciality.objects.all()
             to_upd_codes={}

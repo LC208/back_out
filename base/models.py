@@ -31,7 +31,7 @@ class Speciality(models.Model):
     faculty = models.ForeignKey(
         Faculty, on_delete=models.CASCADE, related_name="specialities"
     )
-    education_level = models.CharField(max_length=64, blank=True, null=True)
+    education_level = models.SmallIntegerField(blank=True, null=True)
     full_name = models.CharField(max_length=512, blank=True, null=True)
 
 

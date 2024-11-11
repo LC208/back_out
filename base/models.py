@@ -20,13 +20,6 @@ class Faculty(models.Model):
         return self.name
 
 class Speciality(models.Model):
-    class EducationLevel(models.TextChoices):
-        BACHELOR = "Б", "Бакалавриат"
-        SPECIALITY = "С", "Специалитет"
-        MASTER = "М", "Магистратура"
-        GRADUATE = "А", "Аспирантура"
-        SPO = "СПО", "Среднее профессиональное образование"
-
     code = models.CharField(max_length=255, blank=True, null=True)
     faculty = models.ForeignKey(
         Faculty, on_delete=models.CASCADE, related_name="specialities"

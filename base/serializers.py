@@ -5,7 +5,6 @@ from rest_framework.serializers import ModelSerializer,CharField,Serializer
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from base.models import DocLink, Practice, Speciality, Theme, Companies, CompanyRepresentativeProfile,Faculty
-from olddb.serializers import CompanySerializer
 
 class UserSerializer(ModelSerializer):
     class Meta:
@@ -93,7 +92,18 @@ class SpecialitySerializer(ModelSerializer):
         list_serializer_class=SpecialityListSerializer
 
 
+class CompanySerializer(ModelSerializer):
+    class Meta:
+        model = Companies
+        fields = "__all__"
 
+
+class FacultySerializer(ModelSerializer):
+    specialities = SpecialitySerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Faculty
+        fields = "__all__"
 
 
 class ThemeSerializer(ModelSerializer):

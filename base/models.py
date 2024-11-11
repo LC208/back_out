@@ -40,7 +40,7 @@ class Speciality(models.Model):
         db_table = 'base_speciality'
 
     def __str__(self):
-        return self.full_name
+        return self.code
 
 
 class Companies(models.Model):

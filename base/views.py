@@ -207,9 +207,9 @@ class CompanySingleViewByToken(APIView):
         company_selected = Companies.objects.filter(user=request.user.id)
         if len(company_selected) == 1:
             inp = inp | {'company' : company_selected[0]}
-        practices_selected = Practice.objects.filter(company=company_selected[0].id)
-        if len(practices_selected) > 0:
-            inp = inp | {'practices' : practices_selected}
+            practices_selected = Practice.objects.filter(company=company_selected[0].id)
+            if len(practices_selected) > 0:
+                inp = inp | {'practices' : practices_selected}
         crp_selected = CompanyRepresentativeProfile.objects.filter(user=request.user.id)
         if len(crp_selected) == 1:
             inp = inp | {'company_representative_profile' : crp_selected[0]}

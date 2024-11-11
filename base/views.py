@@ -220,6 +220,8 @@ class CompanySingleViewByToken(APIView):
         responses=None
     )
     def patch(self, request):
+        if not any(key in request.data for key in ['practices', 'company', 'user', 'company_representative_profile']):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE'])
         if not refresh_token:
             raise AuthenticationFailed('Refresh token not found in cookies.')

@@ -20,17 +20,27 @@ class Faculty(models.Model):
         return self.name
 
 class Speciality(models.Model):
-    name = models.CharField(max_length=255, blank=True, null=True)
+    class EducationLevel(models.TextChoices):
+        BACHELOR = "Б", "Бакалавриат"
+        SPECIALITY = "С", "Специалитет"
+        MASTER = "М", "Магистратура"
+        GRADUATE = "А", "Аспирантура"
+        SPO = "СПО", "Среднее профессиональное образование"
+
+    code = models.CharField(max_length=255, blank=True, null=True)
     faculty = models.ForeignKey(
         Faculty, on_delete=models.CASCADE, related_name="specialities"
     )
+    education_level = models.SmallIntegerField(blank=True, null=True)
+    full_name = models.CharField(max_length=512, blank=True, null=True)
+
 
     class Meta:
         managed = False
         db_table = 'base_speciality'
 
     def __str__(self):
-        return self.name
+        return self.full_name
 
 
 class Companies(models.Model):

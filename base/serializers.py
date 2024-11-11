@@ -1,7 +1,10 @@
+import this
+
+from attr.filters import exclude
 from rest_framework.serializers import ModelSerializer,CharField,Serializer
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from base.models import DocLink, Practice, Speciality, Theme, Companies
+from base.models import DocLink, Practice, Speciality, Theme, Companies, CompanyRepresentativeProfile,Faculty
 from olddb.serializers import CompanySerializer
 
 class UserSerializer(ModelSerializer):
@@ -20,7 +23,6 @@ class UserSerializer(ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}
         }
-
 
 
 class AuthSerializer(ModelSerializer):
@@ -49,11 +51,50 @@ class PracticeAddSerializer(ModelSerializer):
         model = Practice
         fields = "__all__"
 
-class SpecialitySerializer(ModelSerializer):
+
+
+class SpecialityListSerializer(serializers.ListSerializer):
+    
+    def update(self, instance, validated_data):
+        item_mapping = {item.id: item for item in instance}
+        data_mapping = {item_data['id']: item_data for item_data in validated_data if 'id' in item_data}
+
+        updated_items = []
+        created_items = []
+        existing_ids = set(item_mapping.keys())
+
+        for item_data in validated_data:
+            item_id = item_data.get('id', None)
+            if item_id and item_id in item_mapping:
+                item = item_mapping[item_id]
+                for attr, value in item_data.items():
+                    setattr(item, attr, value)
+                updated_items.append(item)
+            else:
+                created_items.append(Speciality(**item_data))
+
+        Speciality.objects.bulk_update(updated_items, fields=['code', 'faculty', 'education_level', 'full_name'])
+
+        if created_items:
+            Speciality.objects.bulk_create(created_items)
+
+        return instance
 
     class Meta:
         model = Speciality
         fields = "__all__"
+
+class SpecialitySerializer(ModelSerializer):
+    id = serializers.IntegerField(required=False)
+
+    class Meta:
+        model = Speciality
+        fields = "__all__"
+        list_serializer_class=SpecialityListSerializer
+
+
+
+
 
 class ThemeSerializer(ModelSerializer):
 
@@ -70,8 +111,8 @@ class PracticeListSerializer(ModelSerializer):
         model = Practice
         fields = "__all__"
 
+
 class PracticeSerializer(ModelSerializer):
-    company = CharField(required=False)
     class Meta:
         model = Practice
         fields = "__all__"
@@ -82,6 +123,7 @@ class DockLinkTestSerializer(ModelSerializer):
         model = DocLink
         fields = "__all__"
 
+
 class PracticeTestSerializer(ModelSerializer):
     company = CharField(required=False)
     links = DockLinkTestSerializer(many=True, required=False)
@@ -89,7 +131,7 @@ class PracticeTestSerializer(ModelSerializer):
         model = Practice
         fields = "__all__"
 
-class Company_Serializer(serializers.ModelSerializer):
+class CompanyPracticeDocLinkSerializer(serializers.ModelSerializer):
     practices = PracticeTestSerializer(many=True, required=False)
     users = UserSerializer(required=False)
     class Meta:
@@ -112,8 +154,123 @@ class Company_Serializer(serializers.ModelSerializer):
         return company
 
 class CompanyFullSerializer(ModelSerializer):
-
     #doc_links = DockLinkSerializer(many=True)
     class Meta:
         model = Companies
         fields = "__all__"
+
+class CompanyRepresentativeProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyRepresentativeProfile
+        fields = ['job_title']
+
+
+
+class DockLinkTrimmedSerializer(ModelSerializer):
+    id = serializers.IntegerField()
+    class Meta:
+        model = DocLink
+        exclude = ['practice']
+
+class ThemeTrimmedSerializer(ModelSerializer):
+    id = serializers.IntegerField()
+    class Meta:
+        model = Theme
+        exclude = ['practice']
+        write_only_fields = ('company',)
+
+class PracticeTrimmedListSerializer(ModelSerializer):
+    id = serializers.IntegerField()
+    doc_links = DockLinkTrimmedSerializer(many=True)
+    themes = ThemeTrimmedSerializer(many=True)
+    class Meta:
+        model = Practice
+        exclude = ['company']
+
+class UserTrimmedSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "password"
+        ]
+        read_only_fields = ('id', )
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+class CompanyTrimmedSerializer(ModelSerializer):
+    class Meta:
+        model = Companies
+        exclude = ['user']
+
+class UserProfileEditSerializer(serializers.Serializer):
+    practices = PracticeTrimmedListSerializer(required=False, many=True,partial=True)
+    company = CompanyTrimmedSerializer(required=False,partial=True)
+    user = UserTrimmedSerializer(required=False,partial=True)
+    company_representative_profile = CompanyRepresentativeProfileSerializer(required=False,partial=True)
+
+    def update(self, instances, validated_data):
+        for instance in instances:
+            # Обработка и обновление User
+            if isinstance(instance, User):
+                user_data = validated_data.get('user', None)
+                if user_data:
+                    user_serializer = UserTrimmedSerializer(instance, data=user_data, partial=True)
+                    if user_serializer.is_valid(raise_exception=True):
+                        user_serializer.save()
+
+            # Обработка и обновление Company
+            elif isinstance(instance, Companies):
+                company_data = validated_data.get('company', None)
+                if company_data:
+                    company_serializer = CompanyTrimmedSerializer(instance, data=company_data, partial=True)
+                    if company_serializer.is_valid(raise_exception=True):
+                        company_serializer.save()
+
+            elif isinstance(instance, Practice):
+                practices_data = validated_data.get('practices', None)
+                if practices_data:
+                    for practice_data in practices_data:
+                        id = practice_data.pop('id')
+                        if id == instance.id:
+                            practice_serializer = PracticeTrimmedListSerializer(instance, data=practice_data, partial=True)
+                            
+                            doc_links_data = practice_data.pop('doc_links', [])
+                            themes_data = practice_data.pop('themes', [])
+                            practice_data['faculty'] = practice_data['faculty'].id
+
+                            for doc_link_data in doc_links_data:
+                                doc_id = doc_link_data.pop('id')
+                                doc_inst = DocLink.objects.get(id=doc_id, practice=instance.id)
+                                if doc_inst:
+                                    doc_link_serializer = DockLinkTrimmedSerializer(doc_inst,data=doc_link_data, partial=True)
+                                    if doc_link_serializer.is_valid(raise_exception=True):
+                                        doc_link_serializer.save()
+
+                            for theme_data in themes_data:
+                                t_id = doc_link_data.pop('id')
+                                t_inst = Theme.objects.get(id=t_id, practice=instance.id)
+                                if t_inst:
+                                    theme_serializer = ThemeTrimmedSerializer(t_inst,data=theme_data, partial=True)
+                                    if theme_serializer.is_valid(raise_exception=True):
+                                        theme_serializer.save()
+
+                            if practice_serializer.is_valid(raise_exception=True):
+                                practice_instance = practice_serializer.save()
+                                
+
+            elif isinstance(instance, CompanyRepresentativeProfile):
+                company_rep_data = validated_data.pop('company_representative_profile', None)
+                if company_rep_data:
+                    company_rep_serializer = CompanyRepresentativeProfileSerializer(
+                        instance.company_representative_profile, data=company_rep_data, partial=True
+                    )
+                    if company_rep_serializer.is_valid():
+                        company_rep_serializer.save()
+
+        return instances

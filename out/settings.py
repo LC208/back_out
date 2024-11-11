@@ -140,6 +140,9 @@ DATABASES = {
         "PASSWORD": os.getenv("DB_PASSWORD", default="228322"),
         "HOST": os.getenv("DB_HOST", default="127.0.0.1"),
         "PORT": os.getenv("DB_PORT", default="4000"),
+        'OPTIONS': {
+            'options': '-c search_path=practices,public'
+        },
     }
 }
 

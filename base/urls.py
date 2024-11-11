@@ -12,7 +12,7 @@ from base.views import (
     UserAuthView,
     UserCreateView,
     UserLogOutView,
-    CompamySingleViewByToken,
+    CompanySingleViewByToken,
     CookieTokenRefreshView,
 )
 
@@ -30,6 +30,6 @@ urlpatterns = [
     path("user/add", UserCreateView.as_view(), name="user_add"),
     path("auth/refresh", CookieTokenRefreshView.as_view()),
     path("auth/log_out",UserLogOutView.as_view()),
-    path("user/info",CompamySingleViewByToken.as_view()),
+    path("user/info",CompanySingleViewByToken.as_view()),
 
 ]

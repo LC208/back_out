@@ -7,6 +7,7 @@ import requests
 import out.settings as db
 from base.serializers import SpecialitySerializer
 from base.models import Speciality
+import json
 
 pictures = [
     ('https://job.istu.edu/out/img/IMG_2384.png',
@@ -30,7 +31,11 @@ pictures = [
     ]
 
 trans = {"46":5, "36":7,"45":2,"69725":16,"38":8,"50":14,"33":1,"34":6,"43":3}
-
+trans_el = {1:Speciality.EducationLevel.SPECIALITY[0],
+            2:Speciality.EducationLevel.BACHELOR[0],
+            3:Speciality.EducationLevel.MASTER[0],
+            4:Speciality.EducationLevel.SPO[0],
+            5:Speciality.EducationLevel.GRADUATE[0]}
 
 class Command(BaseCommand):
     '''
@@ -44,24 +49,48 @@ class Command(BaseCommand):
         if r.status_code == 200:
             mykeys = [*r.json()['RecordSet']]
             groups = list(self.get_uniq_value(mykeys,
-                                                ['abbr', 'facid'],
+                                                ['abbr', 'facid','cadmkind','direct_name'],
                                                 reg=r'[.]'))
 
-            groups = [(x[0], trans[str(x[1])]) if str(x[1]) in trans else x for x in groups]
+            groups = [(x[0].strip(), trans[str(x[1])], trans_el[x[2]], x[3].strip()) for x in groups if str(x[1]) in trans and x[2] in trans_el ]
             not_in = list()
             specs = Speciality.objects.all()
+            to_upd_codes={}
+            ids=[]
+            codes = [x[0] for x in groups]
             for spec in specs:
-                if (spec.name, spec.faculty_id) not in groups:
+                if spec.code in codes and (spec.code, spec.faculty_id,spec.education_level,spec.full_name) not in groups:
+                    to_upd_codes[spec.code] = spec.id
+                    ids.append(spec.id)
+                elif spec.code not in codes:
                     spec.delete()
             for x in groups:
                 name = x[0]
                 faculty_id = x[1]
-                if not Speciality.objects.filter(name=name, faculty=faculty_id):
-                    not_in.append({'name':name, 'faculty':faculty_id})
-                
-            deser = SpecialitySerializer(data=not_in, many=True)
-            if deser.is_valid():
-                deser.save()
+                education_level = x[2]
+                full_name = x[3]
+                if name in to_upd_codes:
+                    not_in.append({
+                                'id':to_upd_codes[name],
+                                'code':name,
+                                'faculty':faculty_id,
+                                'education_level':education_level,
+                                'full_name':full_name})
+
+                elif not Speciality.objects.filter(code=name,
+                                                    faculty=faculty_id,
+                                                    education_level=education_level,
+                                                    full_name=full_name):
+                    not_in.append({'code':name,
+                                    'faculty':faculty_id,
+                                    'education_level':education_level,
+                                    'full_name':full_name})
+            deser_upd = SpecialitySerializer(Speciality.objects.filter(id__in=ids),data=not_in, many=True)
+            # deser = SpecialitySerializer(data=not_in, many=True)
+            # if deser.is_valid(raise_exception=True):
+            #     deser.save()
+            if deser_upd.is_valid(raise_exception=True):
+                deser_upd.save()
 
     def get_uniq_value(self, dict_list, names, restrict=lambda x: True, reg=''):
         '''

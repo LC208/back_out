@@ -3,7 +3,7 @@ import requests
 import random
 import string
 from django.core.management.base import BaseCommand
-from base.serializers import Company_Serializer
+from base.serializers import CompanyPracticeDocLinkSerializer
 
 
 class Command(BaseCommand):
@@ -91,7 +91,7 @@ class Command(BaseCommand):
             "agreements":agreements[i],
             "users":user[i],
             "practices":pract,}
-            ser = Company_Serializer(data=data_set)
+            ser = CompanyPracticeDocLinkSerializer(data=data_set)
             if ser.is_valid():
                 ser.save()
             else:

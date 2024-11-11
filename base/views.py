@@ -1,4 +1,6 @@
-from rest_framework import status
+from os import access
+
+from rest_framework import status, serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django_filters import rest_framework as filters
@@ -12,8 +14,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from base.models import Practice, DocLink, Speciality, Theme, Companies
-from base.serializers import DockLinkSerializer, CompanyFullSerializer
+from base.models import Practice, DocLink, Speciality, Theme, Companies, CompanyRepresentativeProfile, Faculty
+from base.serializers import DockLinkSerializer, UserProfileEditSerializer, CompanyRepresentativeProfileSerializer
 from base.serializers import (
     PracticeAddSerializer,
     PracticeListSerializer,
@@ -21,6 +23,7 @@ from base.serializers import (
     SpecialitySerializer,
     UserSerializer,
     AuthSerializer,
+    PracticeSerializer,
 )
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -30,7 +33,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from django.conf import settings
 from drf_spectacular.utils import extend_schema
 
-
+from itertools import chain
 
 
 # Create your views here.
@@ -143,7 +146,7 @@ class UserLogOutView(GenericAPIView):
             token.blacklist()
         except Exception as e:
             return Response({'error': 'Invalid Refresh token'},status=status.HTTP_400_BAD_REQUEST)
-        return Response ({'success':'Success log out'},status=status.HTTP_200_OK)
+        return Response (status=status.HTTP_200_OK)
 
 
 class CookieTokenRefreshView(TokenRefreshView):
@@ -190,28 +193,44 @@ class CookieTokenRefreshView(TokenRefreshView):
         except Exception:
             return Response({'error': 'Refresh token blacklisted'},status=status.HTTP_400_BAD_REQUEST)
 
-class CompamySingleViewByToken(APIView):
+class CompanySingleViewByToken(APIView):
     @extend_schema(
         request=None,
+        responses=UserProfileEditSerializer()
+    )
+    def post(self, request):
+        inp = {}
+        user_selected = User.objects.filter(id=request.user.id)
+        if user_selected is None:
+            return Response({'error': 'User not found'},status=status.HTTP_401_UNAUTHORIZED)
+        inp = inp | {'user' : user_selected[0]}
+        company_selected = Companies.objects.filter(user=request.user.id)
+        if len(company_selected) == 1:
+            inp = inp | {'company' : company_selected[0]}
+        practices_selected = Practice.objects.filter(company=company_selected[0].id)
+        if len(practices_selected) > 0:
+            inp = inp | {'practices' : practices_selected}
+        crp_selected = CompanyRepresentativeProfile.objects.filter(user=request.user.id)
+        if len(crp_selected) == 1:
+            inp = inp | {'company_representative_profile' : crp_selected[0]}
+        serializer = UserProfileEditSerializer(inp)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+    @extend_schema(
+        request=UserProfileEditSerializer(),
         responses=None
     )
-    def post(self,request):
-        user_selected = User.objects.get(id=request.user.id)
-        if user_selected is None:
+    def patch(self, request):
+        if not any(key in request.data for key in ['practices', 'company', 'user', 'company_representative_profile']):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE'])
+        if not refresh_token:
+            raise AuthenticationFailed('Refresh token not found in cookies.')
+        inst = User.objects.filter(id=request.user.id)
+        if inst is None:
             return Response({'error': 'User not found'},status=401)
-        compamy_selected = Companies.objects.filter(user=request.user.id)
-        if len(compamy_selected) == 0:
-            return Response({'username': user_selected.username,
-                         'email':user_selected.email,
-                         'first_name':user_selected.first_name,
-                         'last_name':user_selected.last_name,
-                         },status=200)
-        compamy_selected = compamy_selected.get(user=request.user.id)
-        return Response({'username': user_selected.username,
-                         'email':user_selected.email,
-                         'first_name':user_selected.first_name,
-                         'last_name':user_selected.last_name,
-                         'company_name':compamy_selected.name,
-                         'company_image':compamy_selected.image,
-                         'company_area':compamy_selected.area_of_activity,
-                         },status=200)
+        company_selected = Companies.objects.filter(user=request.user.id)
+        out = list(chain(inst, company_selected, Practice.objects.filter(company=company_selected[0].id), CompanyRepresentativeProfile.objects.filter(user=request.user.id)))
+        serializer = UserProfileEditSerializer(out,data=request.data,partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save() 
+        return Response(status=status.HTTP_200_OK)

@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAdminUser, AllowAny, SAFE_METHODS, Base
 
 from base.models import Faculty, Companies
 # from models import Faculty
-from olddb.serializers import CompanySerializer, FacultySerializer
+from base.serializers import CompanySerializer, FacultySerializer
 from base.permissions import ReadOnly
 
 

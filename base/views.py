@@ -84,6 +84,14 @@ class ThemeCreateView(CreateAPIView):
     queryset = Theme.objects.all()
     serializer_class = ThemeSerializer
 
+class ThemeSingleView(RetrieveAPIView):
+    queryset = Theme.objects.all()
+    serializer_class = ThemeSerializer
+
+class ThemeListView(ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = Theme.objects.all()
+    serializer_class = ThemeSerializer
 
 class UserCreateView(CreateAPIView):
     permission_classes = [IsAdminUser]

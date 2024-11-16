@@ -13,7 +13,7 @@ from base.views import (
     UserCreateView,
     UserLogOutView,
     CompanySingleViewByToken,
-    CookieTokenRefreshView,
+    CookieTokenRefreshView, ThemeSingleView, ThemeListView,
 )
 
 urlpatterns = [
@@ -21,11 +21,13 @@ urlpatterns = [
     path("practice/", PracticesList.as_view(), name="practice_list"),
     path("practice/add", PracticeCreateView.as_view(), name="practice_add"),
     path("practice/<int:pk>", PracticeSingleView.as_view(), name="practice_single"),
-    path("theme/add", ThemeCreateView.as_view(), name="company_add"),
+    path("theme/", ThemeListView.as_view(), name="theme_list"),
+    path("theme/add", ThemeCreateView.as_view(), name="theme_add"),
+    path("theme/<int:pk>", ThemeSingleView.as_view(), name="theme_single"),
     path("speciality/add", SpecialityCreateView.as_view(), name="speciality_add"),
     path("speciality/", SpecialityList.as_view(), name="speciality_list"),
     path("speciality/<int:pk>", SpecialitySingleView.as_view(), name="speciality_single"),
-    path("doclinks/add", DocLinkCreateView.as_view(), name="doclinks-add"),
+    path("doclinks/add", DocLinkCreateView.as_view(), name="doclinks_add"),
     path("auth/", UserAuthView.as_view(), name="auth"),
     path("user/add", UserCreateView.as_view(), name="user_add"),
     path("auth/refresh", CookieTokenRefreshView.as_view()),

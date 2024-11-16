@@ -2,14 +2,12 @@
 from rest_framework.generics import (
     ListAPIView,
     CreateAPIView,
-    RetrieveUpdateDestroyAPIView,
+    RetrieveAPIView,
 )
-from rest_framework.permissions import IsAdminUser, AllowAny, SAFE_METHODS, BasePermission, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, AllowAny
 
 from base.models import Faculty, Companies
-# from models import Faculty
 from base.serializers import CompanySerializer, FacultySerializer
-from base.permissions import ReadOnly
 
 
 class FacultyList(ListAPIView):
@@ -24,8 +22,7 @@ class FacultyCreateView(CreateAPIView):
     serializer_class = FacultySerializer
 
 
-class FacultySingleView(RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAdminUser|ReadOnly]
+class FacultySingleView(RetrieveAPIView):
     queryset = Faculty.objects.all()
     serializer_class = FacultySerializer
 
@@ -42,7 +39,6 @@ class CompanyCreateView(CreateAPIView):
     serializer_class = CompanySerializer
 
 
-class CompanySingleView(RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAdminUser|ReadOnly]
+class CompanySingleView(RetrieveAPIView):
     queryset = Companies.objects.all()
     serializer_class = CompanySerializer

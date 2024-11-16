@@ -7,15 +7,14 @@ from django_filters import rest_framework as filters
 from rest_framework.generics import (
     ListAPIView,
     CreateAPIView,
-    RetrieveUpdateDestroyAPIView,
-    GenericAPIView
+    GenericAPIView, RetrieveAPIView
 )
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.response import Response
 
-from base.models import Practice, DocLink, Speciality, Theme, Companies, CompanyRepresentativeProfile, Faculty
-from base.serializers import DockLinkSerializer, UserProfileEditSerializer, CompanyRepresentativeProfileSerializer
+from base.models import Practice, DocLink, Speciality, Theme, Companies, CompanyRepresentativeProfile
+from base.serializers import DockLinkSerializer, UserProfileEditSerializer
 from base.serializers import (
     PracticeAddSerializer,
     PracticeListSerializer,
@@ -23,12 +22,9 @@ from base.serializers import (
     SpecialitySerializer,
     UserSerializer,
     AuthSerializer,
-    PracticeSerializer,
 )
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
-from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework.exceptions import AuthenticationFailed
 from django.conf import settings
 from drf_spectacular.utils import extend_schema
@@ -39,7 +35,7 @@ from itertools import chain
 # Create your views here.
 
 
-class SpecilityCreateView(CreateAPIView):
+class SpecialityCreateView(CreateAPIView):
     permission_classes = [IsAdminUser]
     queryset = Speciality.objects.all()
     serializer_class = SpecialitySerializer
@@ -53,8 +49,7 @@ class SpecialityList(ListAPIView):
     serializer_class = SpecialitySerializer
 
 
-class SpecialitySingleView(RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAdminUser|IsAuthenticated]
+class SpecialitySingleView(RetrieveAPIView):
     queryset = Speciality.objects.all()
     serializer_class = SpecialitySerializer
 
@@ -73,8 +68,7 @@ class PracticesList(ListAPIView):
     filterset_fields = ("faculty",)
 
 
-class PracticeSingleView(RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAdminUser|IsAuthenticated]
+class PracticeSingleView(RetrieveAPIView):
     queryset = Practice.objects.all()
     serializer_class = PracticeListSerializer
 

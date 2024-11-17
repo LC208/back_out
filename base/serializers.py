@@ -1,7 +1,4 @@
-import this
-
-from attr.filters import exclude
-from rest_framework.serializers import ModelSerializer,CharField,Serializer
+from rest_framework.serializers import ModelSerializer,CharField
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from base.models import DocLink, Practice, Speciality, Theme, Companies, CompanyRepresentativeProfile,Faculty
@@ -44,12 +41,38 @@ class DockLinkSerializer(ModelSerializer):
         model = DocLink
         fields = "__all__"
 
+class DockLinkNoIdSerializer(ModelSerializer):
+    class Meta:
+        model = DocLink
+        exclude = ['id','practice']
+
+class ThemeNoIdSerializer(ModelSerializer):
+    class Meta:
+        model = Theme
+        exclude = ['id','practice']
+        write_only_fields = ('company',)
 
 class PracticeAddSerializer(ModelSerializer):
     class Meta:
         model = Practice
         fields = "__all__"
 
+class PracticeNoIdSerializer(ModelSerializer):
+    themes = ThemeNoIdSerializer(many=True)
+    doc_links = DockLinkNoIdSerializer(many=True)
+    class Meta:
+        model = Practice
+        exclude = ["id","company"]
+    def create(self, validated_data):
+        docklink_data =  validated_data.pop('doc_links')
+        theme_data = validated_data.pop('themes')
+        validated_data = validated_data|{'company':Companies.objects.filter(id=self.context.get('company'))[0]}
+        practice_selected = Practice.objects.create(**validated_data)
+        for dock in docklink_data:
+            DocLink.objects.create(practice=practice_selected, **dock)
+        for theme in theme_data:
+            Theme.objects.create(practice=practice_selected, **theme)
+        return practice_selected
 
 
 class SpecialityListSerializer(serializers.ListSerializer):
@@ -117,12 +140,6 @@ class PracticeListSerializer(ModelSerializer):
     company = CompanySerializer()
     doc_links = DockLinkSerializer(many=True)
     themes = ThemeSerializer(many=True)
-    class Meta:
-        model = Practice
-        fields = "__all__"
-
-
-class PracticeSerializer(ModelSerializer):
     class Meta:
         model = Practice
         fields = "__all__"

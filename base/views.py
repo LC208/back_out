@@ -1,6 +1,4 @@
-from os import access
-
-from rest_framework import status, serializers
+from rest_framework import status
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django_filters import rest_framework as filters
@@ -14,7 +12,7 @@ from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.response import Response
 
 from base.models import Practice, DocLink, Speciality, Theme, Companies, CompanyRepresentativeProfile
-from base.serializers import DockLinkSerializer, UserProfileEditSerializer
+from base.serializers import DockLinkSerializer, UserProfileEditSerializer, PracticeNoIdSerializer
 from base.serializers import (
     PracticeAddSerializer,
     PracticeListSerializer,
@@ -53,11 +51,23 @@ class SpecialitySingleView(RetrieveAPIView):
     queryset = Speciality.objects.all()
     serializer_class = SpecialitySerializer
 
-
+'''
 class PracticeCreateView(CreateAPIView):
     permission_classes = [IsAdminUser]
     queryset = Practice.objects.all()
     serializer_class = PracticeAddSerializer
+'''
+class PracticeCreateView(APIView):
+    serializer_class = PracticeNoIdSerializer
+    def post(self, request):
+        select_company = Companies.objects.filter(user=request.user.id)
+        if len(select_company)==1:
+            serializer = PracticeNoIdSerializer(data=request.data,context={'company':select_company[0].id})
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                return Response({'description':serializer.errors},status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
 
 
 class PracticesList(ListAPIView):
@@ -229,7 +239,7 @@ class CompanySingleViewByToken(APIView):
             raise AuthenticationFailed('Refresh token not found in cookies.')
         inst = User.objects.filter(id=request.user.id)
         if inst is None:
-            return Response({'error': 'User not found'},status=401)
+            return Response({'error': 'User not found'},status=status.HTTP_401_UNAUTHORIZED)
         company_selected = Companies.objects.filter(user=request.user.id)
         out = list(chain(inst, company_selected, Practice.objects.filter(company=company_selected[0].id), CompanyRepresentativeProfile.objects.filter(user=request.user.id)))
         serializer = UserProfileEditSerializer(out,data=request.data,partial=True)

@@ -172,7 +172,7 @@ class CompanyFullSerializer(ModelSerializer):
 class CompanyRepresentativeProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyRepresentativeProfile
-        fields = ['job_title']
+        fields = ['job_title','email','messenger']
 
 
 

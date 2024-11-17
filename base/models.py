@@ -57,7 +57,8 @@ class CompanyRepresentativeProfile(models.Model):
     id = models.BigAutoField(primary_key=True)
     job_title = models.CharField(max_length=512, blank=True, null=True)
     user = models.OneToOneField(User, models.DO_NOTHING, blank=True, null=True)
-
+    email = models.CharField(max_length=254, blank=True, null=True)
+    messenger = models.CharField(max_length=128, blank=True, null=True)
     class Meta:
         managed = False
         db_table = 'models_collect_companyrepresentativeprofile'

@@ -48,6 +48,7 @@ class SpecialityList(ListAPIView):
 
 
 class SpecialitySingleView(RetrieveAPIView):
+    permission_classes = [AllowAny]
     queryset = Speciality.objects.all()
     serializer_class = SpecialitySerializer
 
@@ -79,6 +80,7 @@ class PracticesList(ListAPIView):
 
 
 class PracticeSingleView(RetrieveAPIView):
+    permission_classes = [AllowAny]
     queryset = Practice.objects.all()
     serializer_class = PracticeListSerializer
 
@@ -95,6 +97,7 @@ class ThemeCreateView(CreateAPIView):
     serializer_class = ThemeSerializer
 
 class ThemeSingleView(RetrieveAPIView):
+    permission_classes = [AllowAny]
     queryset = Theme.objects.all()
     serializer_class = ThemeSerializer
 

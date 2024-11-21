@@ -23,6 +23,7 @@ class FacultyCreateView(CreateAPIView):
 
 
 class FacultySingleView(RetrieveAPIView):
+    permission_classes = [AllowAny]
     queryset = Faculty.objects.all()
     serializer_class = FacultySerializer
 
@@ -40,5 +41,6 @@ class CompanyCreateView(CreateAPIView):
 
 
 class CompanySingleView(RetrieveAPIView):
+    permission_classes = [AllowAny]
     queryset = Companies.objects.all()
     serializer_class = CompanySerializer

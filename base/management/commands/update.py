@@ -45,7 +45,7 @@ class Command(BaseCommand):
         if r.status_code == 200:
             mykeys = [*r.json()['RecordSet']]
             groups = list(self.get_uniq_value(mykeys,
-                                                ['abbr', 'facid','cadmkind','direct_name'],
+                                                ['abbr', 'facid','cadmkind','spec_name'],
                                                 reg=r'[.]'))
 
             groups = [(x[0].strip(), trans[str(x[1])], x[2], x[3].strip()) for x in groups if str(x[1]) in trans and x[2] in trans_el ]

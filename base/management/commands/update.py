@@ -45,10 +45,9 @@ class Command(BaseCommand):
         if r.status_code == 200:
             mykeys = [*r.json()['RecordSet']]
             groups = list(self.get_uniq_value(mykeys,
-                                                ['abbr', 'facid','cadmkind','spec_name'],
+                                                ['abbr', 'facid', 'cadmkind', 'spec_name', 'direct_name'],
                                                 reg=r'[.]'))
-
-            groups = [(x[0].strip(), trans[str(x[1])], x[2], x[3].strip()) for x in groups if str(x[1]) in trans and x[2] in trans_el ]
+            groups = [(x[0].strip(), trans[str(x[1])], x[2], x[3].strip() if x[3] is not None else x[4].strip()) for x in groups if str(x[1]) in trans and x[2] in trans_el ]
             not_in = list()
             specs = Speciality.objects.all()
             to_upd_codes={}

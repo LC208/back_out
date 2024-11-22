@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer,CharField
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from base.models import DocLink, Practice, Speciality, Theme, Companies, CompanyRepresentativeProfile,Faculty
+from base.models import DocLink, Practice, Speciality, Theme, Companies, CompanyRepresentativeProfile,Faculty, UserFile
 
 class UserSerializer(ModelSerializer):
     class Meta:
@@ -20,6 +20,13 @@ class UserSerializer(ModelSerializer):
             'password': {'write_only': True}
         }
 
+
+
+class UserFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserFile
+        fields = ['id', 'user', 'file', 'uploaded_at']
+        read_only_fields = ['id', 'uploaded_at','user']
 
 class AuthSerializer(ModelSerializer):
     username = serializers.CharField(required=True,write_only=True)

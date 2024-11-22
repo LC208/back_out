@@ -10,8 +10,8 @@ from rest_framework.generics import (
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.response import Response
-
-from base.models import Practice, DocLink, Speciality, Theme, Companies, CompanyRepresentativeProfile
+from rest_framework.parsers import MultiPartParser, FormParser
+from base.models import Practice, DocLink, Speciality, Theme, Companies, CompanyRepresentativeProfile, UserFile
 from base.serializers import DockLinkSerializer, UserProfileEditSerializer, PracticeNoIdSerializer
 from base.serializers import (
     PracticeAddSerializer,
@@ -20,15 +20,18 @@ from base.serializers import (
     SpecialitySerializer,
     UserSerializer,
     AuthSerializer,
+    UserFileSerializer,
 )
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, NotFound
 from django.conf import settings
 from drf_spectacular.utils import extend_schema
+from django.http import FileResponse
 
 from itertools import chain
 
+import os
 
 # Create your views here.
 
@@ -249,3 +252,61 @@ class CompanySingleViewByToken(APIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save() 
         return Response(status=status.HTTP_200_OK)
+
+class FileUploadView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+    serializer_class=UserFileSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = UserFileSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, *args, **kwargs):
+        files = UserFile.objects.filter(user=request.user)
+        serializer = UserFileSerializer(files, many=True)
+        return Response(serializer.data)
+
+class UserFileDetailView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_object(self, pk, user):
+        try:
+            return UserFile.objects.get(id=pk, user=user)
+        except UserFile.DoesNotExist:
+            raise NotFound("Файл не найден или у вас нет прав доступа.")
+
+    def get(self, request, pk):
+        user_file = self.get_object(pk, request.user)
+
+        file_path = user_file.file.path
+        file = open(file_path, 'rb')
+        return FileResponse(file, as_attachment=True)
+
+    @extend_schema(
+        request=UserFileSerializer(),
+        responses=None
+    )
+    def put(self, request, pk):
+        user_file = self.get_object(pk, request.user)
+        serializer = UserFileSerializer(user_file, data=request.data)
+        if serializer.is_valid():
+            old_file_path = user_file.file.path
+            if os.path.exists(old_file_path):
+                os.remove(old_file_path)
+
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        user_file = self.get_object(pk, request.user)
+        file_path = user_file.file.path
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+        user_file.delete()
+        return Response({"message": "Файл успешно удален."}, status=status.HTTP_204_NO_CONTENT)

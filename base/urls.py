@@ -14,10 +14,11 @@ from base.views import (
     UserLogOutView,
     CompanySingleViewByToken,
     CookieTokenRefreshView, ThemeSingleView, ThemeListView,
+    FileUploadView,
+    UserFileDetailView,
 )
 
 urlpatterns = [
-
     path("practice/", PracticesList.as_view(), name="practice_list"),
     path("practice/add", PracticeCreateView.as_view(), name="practice_add"),
     path("practice/<int:pk>", PracticeSingleView.as_view(), name="practice_single"),
@@ -33,5 +34,6 @@ urlpatterns = [
     path("auth/refresh", CookieTokenRefreshView.as_view()),
     path("auth/log_out",UserLogOutView.as_view()),
     path("user/info",CompanySingleViewByToken.as_view()),
-
+    path('files/', FileUploadView.as_view(), name='file-upload'),
+    path('files/<int:pk>/', UserFileDetailView.as_view(), name='user-file-detail'),
 ]

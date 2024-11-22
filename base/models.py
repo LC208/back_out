@@ -53,6 +53,12 @@ class Companies(models.Model):
         managed = False
         db_table = 'companies'
 
+
+class UserFile(models.Model):
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='user_files/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
 class CompanyRepresentativeProfile(models.Model):
     id = models.BigAutoField(primary_key=True)
     job_title = models.CharField(max_length=512, blank=True, null=True)

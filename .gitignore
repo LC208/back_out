@@ -4,3 +4,4 @@
 /dbdata
 .env
 /dump
+/media/**

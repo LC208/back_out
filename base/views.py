@@ -1,21 +1,18 @@
-from os import access
-
-from rest_framework import status, serializers
+from rest_framework import status
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django_filters import rest_framework as filters
 from rest_framework.generics import (
     ListAPIView,
     CreateAPIView,
-    RetrieveUpdateDestroyAPIView,
-    GenericAPIView
+    GenericAPIView, RetrieveAPIView
 )
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.response import Response
 
-from base.models import Practice, DocLink, Speciality, Theme, Companies, CompanyRepresentativeProfile, Faculty
-from base.serializers import DockLinkSerializer, UserProfileEditSerializer, CompanyRepresentativeProfileSerializer
+from base.models import Practice, DocLink, Speciality, Theme, Companies, CompanyRepresentativeProfile
+from base.serializers import DockLinkSerializer, UserProfileEditSerializer, PracticeNoIdSerializer
 from base.serializers import (
     PracticeAddSerializer,
     PracticeListSerializer,
@@ -23,12 +20,9 @@ from base.serializers import (
     SpecialitySerializer,
     UserSerializer,
     AuthSerializer,
-    PracticeSerializer,
 )
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
-from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework.exceptions import AuthenticationFailed
 from django.conf import settings
 from drf_spectacular.utils import extend_schema
@@ -39,7 +33,7 @@ from itertools import chain
 # Create your views here.
 
 
-class SpecilityCreateView(CreateAPIView):
+class SpecialityCreateView(CreateAPIView):
     permission_classes = [IsAdminUser]
     queryset = Speciality.objects.all()
     serializer_class = SpecialitySerializer
@@ -53,16 +47,28 @@ class SpecialityList(ListAPIView):
     serializer_class = SpecialitySerializer
 
 
-class SpecialitySingleView(RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAdminUser|IsAuthenticated]
+class SpecialitySingleView(RetrieveAPIView):
+    permission_classes = [AllowAny]
     queryset = Speciality.objects.all()
     serializer_class = SpecialitySerializer
 
-
+'''
 class PracticeCreateView(CreateAPIView):
     permission_classes = [IsAdminUser]
     queryset = Practice.objects.all()
     serializer_class = PracticeAddSerializer
+'''
+class PracticeCreateView(APIView):
+    serializer_class = PracticeNoIdSerializer
+    def post(self, request):
+        select_company = Companies.objects.filter(user=request.user.id)
+        if len(select_company)==1:
+            serializer = PracticeNoIdSerializer(data=request.data,context={'company':select_company[0].id})
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                return Response({'description':serializer.errors},status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
 
 
 class PracticesList(ListAPIView):
@@ -73,8 +79,8 @@ class PracticesList(ListAPIView):
     filterset_fields = ("faculty",)
 
 
-class PracticeSingleView(RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAdminUser|IsAuthenticated]
+class PracticeSingleView(RetrieveAPIView):
+    permission_classes = [AllowAny]
     queryset = Practice.objects.all()
     serializer_class = PracticeListSerializer
 
@@ -90,6 +96,15 @@ class ThemeCreateView(CreateAPIView):
     queryset = Theme.objects.all()
     serializer_class = ThemeSerializer
 
+class ThemeSingleView(RetrieveAPIView):
+    permission_classes = [AllowAny]
+    queryset = Theme.objects.all()
+    serializer_class = ThemeSerializer
+
+class ThemeListView(ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = Theme.objects.all()
+    serializer_class = ThemeSerializer
 
 class UserCreateView(CreateAPIView):
     permission_classes = [IsAdminUser]
@@ -227,7 +242,7 @@ class CompanySingleViewByToken(APIView):
             raise AuthenticationFailed('Refresh token not found in cookies.')
         inst = User.objects.filter(id=request.user.id)
         if inst is None:
-            return Response({'error': 'User not found'},status=401)
+            return Response({'error': 'User not found'},status=status.HTTP_401_UNAUTHORIZED)
         company_selected = Companies.objects.filter(user=request.user.id)
         out = list(chain(inst, company_selected, Practice.objects.filter(company=company_selected[0].id), CompanyRepresentativeProfile.objects.filter(user=request.user.id)))
         serializer = UserProfileEditSerializer(out,data=request.data,partial=True)

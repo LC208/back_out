@@ -79,11 +79,9 @@ class SpecialityListSerializer(serializers.ListSerializer):
     
     def update(self, instance, validated_data):
         item_mapping = {item.id: item for item in instance}
-        data_mapping = {item_data['id']: item_data for item_data in validated_data if 'id' in item_data}
 
         updated_items = []
         created_items = []
-        existing_ids = set(item_mapping.keys())
 
         for item_data in validated_data:
             item_id = item_data.get('id', None)

@@ -92,7 +92,7 @@ class Command(BaseCommand):
         @param dict_list: Лист из словарей с набором значений
         @param names: Набор параметров, который мы вытаскиваем из словарей
         @param restrict: Ограничение в виде анонимной функции
-        @return: Уникальные значения для кортежей из параметров names 
+        @return: Уникальные значения для кортежей из параметров names
         из списка словарей dict_list с ограничением restrict
         '''
         return set([tuple(re.sub(reg, '', x[i]) if isinstance(x[i], str) else x[i] for i in names) for x in dict_list if restrict(x)])

@@ -26,7 +26,7 @@ class Speciality(models.Model):
     )
     education_level = models.SmallIntegerField(blank=True, null=True)
     full_name = models.CharField(max_length=512, blank=True, null=True)
-
+    url = models.CharField(max_length=200,null=True)
 
     class Meta:
         managed = False

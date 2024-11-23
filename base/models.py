@@ -44,6 +44,8 @@ class Companies(models.Model):
     agreements = models.CharField(max_length=255, blank=True, null=True)
     image = models.CharField(max_length=1000, blank=True, null=True)
     user = models.OneToOneField(User, models.DO_NOTHING, blank=True, null=True)
+    head_full_name = models.CharField(max_length=128, blank=True,null=True)
+    head_job_title = models.CharField(max_length=512, blank=True,null=True)
     area_of_activity = models.TextField(blank=True, null=True)
 
     def __str__(self):

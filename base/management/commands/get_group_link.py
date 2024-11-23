@@ -32,7 +32,11 @@ class Command(BaseCommand):
                 inst = Faculty.objects.filter(name=current_inst)
                 if len(inst)==0:
                     continue
-                output_b.append({'faculty':inst[0].id,'url':button_link,'full_name':clear_name,'education_level': 2 if "бакалавриат" in edu_level else (1 if "специалитет" in edu_level else -1)})
+                if "бакалавриат" in edu_level:
+                    output_b.append({'faculty':inst[0].id,'url':button_link,'full_name':clear_name,'education_level': 2})
+                elif "специалитет" in edu_level:
+                    output_b.append(
+                        {'faculty': inst[0].id, 'url': button_link, 'full_name': clear_name, 'education_level': 1})
 
         url = 'https://www.istu.edu/abiturientu/magistratura/napravleniya'
         response = requests.get(url)

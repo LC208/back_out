@@ -101,7 +101,7 @@ class Practice(models.Model):
 
 class Theme(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Название темы")
-    practice = models.ForeignKey(Practice, models.DO_NOTHING, blank=True, null=True, verbose_name="Практика")
+    practice = models.ForeignKey(Practice, models.DO_NOTHING, blank=True, null=True, verbose_name="Практика",related_name="themes")
 
     def __str__(self):
         return self.name or f"Тема {self.id}"

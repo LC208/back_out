@@ -16,6 +16,7 @@ from base.views import (
     CookieTokenRefreshView, ThemeSingleView, ThemeListView,
     FileUploadView,
     UserFileDetailView,
+    StudentPracticView,
 )
 
 urlpatterns = [
@@ -26,6 +27,7 @@ urlpatterns = [
     path("theme/add", ThemeCreateView.as_view(), name="theme_add"),
     path("theme/<int:pk>", ThemeSingleView.as_view(), name="theme_single"),
     path("speciality/", SpecialityList.as_view(), name="speciality_list"),
+    path("students_practic/", StudentPracticView.as_view(), name="sp_list"),
     path("speciality/add", SpecialityCreateView.as_view(), name="speciality_add"),
     path("speciality/<int:pk>", SpecialitySingleView.as_view(), name="speciality_single"),
     path("doclinks/add", DocLinkCreateView.as_view(), name="doclinks_add"),

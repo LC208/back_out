@@ -54,10 +54,7 @@ class Companies(models.Model):
         db_table = 'companies'
 
 
-class UserFile(models.Model):
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
-    file = models.FileField(upload_to='user_files/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+
 
 class CompanyRepresentativeProfile(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -182,6 +179,16 @@ class StudentPractic(models.Model):
         managed = False
         db_table = 'student_practic'
 
+
+class UserFile(models.Model):
+    user = models.ForeignKey('auth.User',  on_delete=models.DO_NOTHING)
+    file = models.FileField(upload_to='user_files/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+class PracticFile(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    practic = models.ForeignKey(StudentPractic, on_delete=models.DO_NOTHING)
+    file = models.ForeignKey(UserFile,  on_delete=models.DO_NOTHING)
 
 class Students(models.Model):
     id = models.BigAutoField(primary_key=True)

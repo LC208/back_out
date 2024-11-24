@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer,CharField
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from base.models import DocLink, Practice, Speciality, Theme, Companies, CompanyRepresentativeProfile,Faculty, UserFile
+from base.models import DocLink, Practice, Speciality, Theme, Companies, CompanyRepresentativeProfile,Faculty, UserFile, PracticFile, StudentPractic
 
 class UserSerializer(ModelSerializer):
     class Meta:
@@ -27,6 +27,39 @@ class UserFileSerializer(serializers.ModelSerializer):
         model = UserFile
         fields = ['id', 'user', 'file', 'uploaded_at']
         read_only_fields = ['id', 'uploaded_at','user']
+
+class StudentPracticSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentPractic
+        fields = ['id', 'student', 'company']
+        read_only_fields = ['id', 'student','company']
+
+class PracticFileSerializer(serializers.ModelSerializer):
+    file = serializers.FileField()
+
+    class Meta:
+        model = PracticFile
+        fields = ['id', 'practic', 'file']
+        read_only_fields = ['id']
+
+    def create(self, validated_data):
+        file_data = validated_data.pop('file')
+        print(validated_data)
+        user = self.context.get('user')
+        user_file = UserFile.objects.create(user=user, file=file_data)
+        return PracticFile.objects.create(file=user_file, **validated_data)
+
+    def update(self, instance, validated_data):
+        file_data = validated_data.pop('file', None)
+        if file_data:
+            file_instance = instance.file
+            for attr, value in file_data.items():
+                setattr(file_instance, attr, value)
+            file_instance.save()
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
 
 class AuthSerializer(ModelSerializer):
     username = serializers.CharField(required=True,write_only=True)

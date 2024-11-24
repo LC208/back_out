@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
-from base.models import Practice, DocLink, Speciality, Theme, Companies, CompanyRepresentativeProfile, UserFile
+from base.models import Practice, DocLink, Speciality, Theme, Companies, CompanyRepresentativeProfile, UserFile,StudentPractic,PracticFile
 from base.serializers import DockLinkSerializer, UserProfileEditSerializer, PracticeNoIdSerializer
 from base.serializers import (
     PracticeAddSerializer,
@@ -21,6 +21,8 @@ from base.serializers import (
     UserSerializer,
     AuthSerializer,
     UserFileSerializer,
+    PracticFileSerializer,
+    StudentPracticSerializer,
 )
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -54,6 +56,10 @@ class SpecialitySingleView(RetrieveAPIView):
     permission_classes = [AllowAny]
     queryset = Speciality.objects.all()
     serializer_class = SpecialitySerializer
+
+class StudentPracticView(ListAPIView):
+    queryset = StudentPractic.objects.all()
+    serializer_class = StudentPracticSerializer
 
 '''
 class PracticeCreateView(CreateAPIView):
@@ -257,12 +263,23 @@ class FileUploadView(APIView):
     parser_classes = (MultiPartParser, FormParser)
     serializer_class=UserFileSerializer
 
+    @extend_schema(
+        request=PracticFileSerializer(),
+        responses=None
+    )
     def post(self, request, *args, **kwargs):
-        serializer = UserFileSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        company = Companies.objects.filter(user=request.user)
+        if len(company) == 1:
+            company = company[0]
+            practics = StudentPractic.objects.filter(company=company)
+            if len(practics) > 0 and "practic" in request.data and len(practics.filter(id=request.data["practic"])) == 1:
+                serializer = PracticFileSerializer(data=request.data, context={'user': request.user})
+                print(serializer.is_valid())
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def get(self, request, *args, **kwargs):
         files = UserFile.objects.filter(user=request.user)

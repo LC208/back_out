@@ -75,6 +75,7 @@ class CompanyRepresentativeProfile(models.Model):
         return f"Представитель {self.user}"
 
     class Meta:
+        db_table = 'models_collect_companyrepresentativeprofile'
         verbose_name = "Представитель компании"
         verbose_name_plural = "Представители компаний"
 

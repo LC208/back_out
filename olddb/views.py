@@ -7,8 +7,7 @@ from rest_framework.generics import (
 from rest_framework.permissions import IsAdminUser, AllowAny
 
 from base.models import Faculty, Companies
-from base.serializers import CompanySerializer, FacultySerializer
-
+from base.serializers import CompanySerializer, FacultySerializer, CompaniesSerializer
 
 class FacultyList(ListAPIView):
     permission_classes = [AllowAny]
@@ -42,5 +41,5 @@ class CompanyCreateView(CreateAPIView):
 
 class CompanySingleView(RetrieveAPIView):
     permission_classes = [AllowAny]
-    queryset = Companies.objects.all()
-    serializer_class = CompanySerializer
+    queryset = Companies.objects.prefetch_related("company__themes")
+    serializer_class = CompaniesSerializer

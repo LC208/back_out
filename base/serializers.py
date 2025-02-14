@@ -299,3 +299,22 @@ class UserProfileEditSerializer(serializers.Serializer):
                         company_rep_serializer.save()
 
         return instances
+
+class ThemeSerializer(serializers.ModelSerializer):
+    practice_id = serializers.IntegerField(source="practice.id", read_only=True)
+
+    class Meta:
+        model = Theme
+        fields = ["id", "name", "practice_id"]
+
+class CompaniesSerializer(serializers.ModelSerializer):
+    themes = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Companies
+        fields = '__all__'
+
+    def get_themes(self, obj):
+        themes = Theme.objects.filter(practice__company=obj)
+        return ThemeSerializer(themes, many=True).data
+

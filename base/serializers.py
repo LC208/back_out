@@ -270,7 +270,7 @@ class UserProfileEditSerializer(serializers.Serializer):
                             practice_data['faculty'] = practice_data['faculty'].id
 
                             for doc_link_data in doc_links_data:
-                                doc_id = doc_link_data.pop('id')
+                                doc_id = doc_link_data['id']
                                 doc_inst = DocLink.objects.get(id=doc_id, practice=instance.id)
                                 if doc_inst:
                                     doc_link_serializer = DockLinkTrimmedSerializer(doc_inst,data=doc_link_data, partial=True)
@@ -278,7 +278,7 @@ class UserProfileEditSerializer(serializers.Serializer):
                                         doc_link_serializer.save()
 
                             for theme_data in themes_data:
-                                t_id = doc_link_data.pop('id')
+                                t_id = theme_data['id']
                                 t_inst = Theme.objects.get(id=t_id, practice=instance.id)
                                 if t_inst:
                                     theme_serializer = ThemeTrimmedSerializer(t_inst,data=theme_data, partial=True)

@@ -245,6 +245,8 @@ class CompanySingleViewByToken(APIView):
             return Response({'error': 'User not found'},status=status.HTTP_401_UNAUTHORIZED)
         company_selected = Companies.objects.filter(user=request.user.id)
         out = list(chain(inst, company_selected, Practice.objects.filter(company=company_selected[0].id), CompanyRepresentativeProfile.objects.filter(user=request.user.id)))
+        if inst[0].username == request.data['user']['username'] :
+            request.data['user'].pop('username')
         serializer = UserProfileEditSerializer(out,data=request.data,partial=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save() 

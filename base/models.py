@@ -80,12 +80,12 @@ class CompanyRepresentativeProfile(models.Model):
         verbose_name_plural = "Представители компаний"
 
 class Practice(models.Model): 
-    name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Название практики")
+    name = models.CharField(max_length=255, db_column='theme' ,blank=True, null=True, verbose_name="Название практики")
     company = models.ForeignKey(
-        Companies, on_delete=models.DO_NOTHING, related_name="company"
+        Companies, db_column='company_id_id' , on_delete=models.DO_NOTHING, related_name="company"
     )
     faculty = models.ForeignKey(
-        Faculty, on_delete=models.DO_NOTHING, related_name="faculty"
+        Faculty,db_column='faculty_id_id' , on_delete=models.DO_NOTHING, related_name="faculty"
     )   
 
 

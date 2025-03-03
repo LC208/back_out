@@ -13,13 +13,11 @@ from base.views import (
     UserCreateView,
     UserLogOutView,
     CompanySingleViewByToken,
-    CookieTokenRefreshView, ThemeSingleView, ThemeListView,
+    CookieTokenRefreshView, ThemeSingleView, ThemeListView,UserInfoView,UserCompanyView,UserPracticeListCreateView,UserPracticeSingleView
 )
 
 urlpatterns = [
 
-    path("practice/", PracticesList.as_view(), name="practice_list"),
-    path("practice/add", PracticeCreateView.as_view(), name="practice_add"),
     path("practice/<int:pk>", PracticeSingleView.as_view(), name="practice_single"),
     path("theme/", ThemeListView.as_view(), name="theme_list"),
     path("theme/add", ThemeCreateView.as_view(), name="theme_add"),
@@ -32,6 +30,8 @@ urlpatterns = [
     path("user/add", UserCreateView.as_view(), name="user_add"),
     path("auth/refresh", CookieTokenRefreshView.as_view()),
     path("auth/log_out",UserLogOutView.as_view()),
-    path("user/info",CompanySingleViewByToken.as_view()),
-
+    path("user/info",UserInfoView.as_view()),
+    path("user/company",UserCompanyView.as_view()),
+    path("user/practice",UserPracticeListCreateView.as_view()),
+    path("user/practice/<int:pk>",UserPracticeSingleView.as_view()),
 ]

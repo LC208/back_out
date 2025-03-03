@@ -2,23 +2,18 @@ from rest_framework.serializers import ModelSerializer,CharField
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from base.models import DocLink, Practice, Speciality, Theme, Companies, CompanyRepresentativeProfile,Faculty
+from django.shortcuts import get_object_or_404
 
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "id",
             "username",
             "first_name",
             "last_name",
             "email",
-            "password",
-            "is_staff",
         ]
-        read_only_fields = ('id', )
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
+        read_only_fields = ('username',)
 
 
 class AuthSerializer(ModelSerializer):
@@ -116,7 +111,7 @@ class SpecialitySerializer(ModelSerializer):
 class CompanySerializer(ModelSerializer):
     class Meta:
         model = Companies
-        fields = "__all__"
+        exclude = ['id', 'user']
 
 
 class FacultySerializer(ModelSerializer):
@@ -205,12 +200,19 @@ class ThemeTrimmedSerializer(ModelSerializer):
         write_only_fields = ('company',)
 
 class PracticeTrimmedListSerializer(ModelSerializer):
-    id = serializers.IntegerField()
-    doc_links = DockLinkTrimmedSerializer(many=True)
-    themes = ThemeTrimmedSerializer(many=True)
+    doc_links = DockLinkTrimmedSerializer(many=True, read_only=True)
+    themes = ThemeTrimmedSerializer(many=True, read_only=True)
+    faculty_name = serializers.CharField(source='faculty.name', read_only=True)
     class Meta:
         model = Practice
+        read_only_fields = ('id',)
         exclude = ['company']
+    
+    def create(self, validated_data):
+        request = self.context['request']
+        company = get_object_or_404(Companies, user=request.user.id)
+        validated_data['company'] = company 
+        return super().create(validated_data)
 
 class UserTrimmedSerializer(ModelSerializer):
     class Meta:

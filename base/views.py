@@ -5,7 +5,7 @@ from django_filters import rest_framework as filters
 from rest_framework.generics import (
     ListAPIView,
     CreateAPIView,
-    GenericAPIView, RetrieveAPIView
+    GenericAPIView, RetrieveAPIView, RetrieveUpdateAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView
 )
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, AllowAny
@@ -20,6 +20,8 @@ from base.serializers import (
     SpecialitySerializer,
     UserSerializer,
     AuthSerializer,
+    CompanySerializer,
+    PracticeTrimmedListSerializer
 )
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -28,6 +30,7 @@ from django.conf import settings
 from drf_spectacular.utils import extend_schema
 
 from itertools import chain
+from django.shortcuts import get_object_or_404
 
 
 # Create your views here.
@@ -207,6 +210,54 @@ class CookieTokenRefreshView(TokenRefreshView):
             return response
         except Exception:
             return Response({'error': 'Refresh token blacklisted'},status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserInfoView(RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    http_method_names = ['get', 'patch']
+        
+    def get_object(self):
+        return self.request.user
+
+class UserCompanyView(RetrieveUpdateAPIView):
+    queryset = Companies.objects.all()
+    serializer_class = CompanySerializer
+    http_method_names = ['get', 'patch']
+        
+    def get_object(self):
+        return get_object_or_404(Companies, user=self.request.user.id)
+
+class UserPracticeListCreateView(ListCreateAPIView):
+    serializer_class = PracticeTrimmedListSerializer
+
+    def get_queryset(self):
+        return Practice.objects.filter(company__user=self.request.user)
+
+class UserPracticeSingleView(RetrieveUpdateDestroyAPIView):
+    queryset = Practice.objects.all()
+    serializer_class = PracticeTrimmedListSerializer
+    http_method_names = ['get', 'patch', 'delete']
+
+    def get_object(self):
+        pk = self.kwargs.get('pk')
+        return get_object_or_404(Practice, pk=pk, company__user=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = self.get_serializer(instance).data
+        self.perform_destroy(instance)
+        return Response(data, status=status.HTTP_200_OK)
+
+# class UserPracticeThemeCreate(CreateAPIView):
+
+# class UserPracticeDocLinkCreate(CreateAPIView):
+
+# class UserPracticeTheme(RetrieveUpdateDestroyAPIView):
+#     http_method_names = ['patch', 'delete']
+
+# class UserPracticeDocLink(RetrieveUpdateDestroyAPIView):
+#     http_method_names = ['patch', 'delete']
 
 class CompanySingleViewByToken(APIView):
     @extend_schema(

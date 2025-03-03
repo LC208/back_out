@@ -24,7 +24,7 @@ class Faculty(models.Model):
 class Speciality(models.Model):
     url = models.SlugField(max_length=200, null=True)
     code = models.CharField(max_length=255, blank=True, null=True, verbose_name="Код специальности")
-    full_name = models.CharField(max_length=512, blank=False, null=True, verbose_name="Название специальности")
+    full_name = models.CharField(max_length=512, blank=True, null=True, verbose_name="Название специальности")
     # education_level = models.CharField(max_length=64, choices=EducationLevel.choices, null=True)
     education_level = models.SmallIntegerField(blank=False, null=True, verbose_name="Уровень образования")
     faculty = models.ForeignKey(

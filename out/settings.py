@@ -9,34 +9,35 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+
 import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+
 # Load environment variables from .env file
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-API_URL = 'http://172.28.20.45/anoshko.ins_napr'
+API_URL = "http://172.28.20.45/anoshko.ins_napr"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY",
-                       default="django-insecure-e-)6&=p*$m%t_!w&k9ui$to!w1@x^j2d+l+rx*_v9o##ee5qv*")
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    default="django-insecure-e-)6&=p*$m%t_!w&k9ui$to!w1@x^j2d+l+rx*_v9o##ee5qv*",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.getenv("DEBUG",
-                       default=False))
+DEBUG = bool(os.getenv("DEBUG", default=False))
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
-CORS_ALLOWED_ORIGINS = [
-    "https://job.istu.edu"
-]
+CORS_ALLOWED_ORIGINS = ["https://job.istu.edu"]
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -51,11 +52,21 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    'base',
-    'olddb',
-    'drf_spectacular',
-    'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',
+    # 'base',
+    # 'olddb',
+    "out",
+    "users",
+    "themes",
+    "specialities",
+    "practices",
+    "faculties",
+    "doclinks",
+    "crp",
+    "companies",
+    "userauth",
+    "drf_spectacular",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
 ]
 
@@ -89,41 +100,34 @@ TEMPLATES = [
 ]
 
 SIMPLE_JWT = {
-
-    'ROTATE_REFRESH_TOKENS': True,
-
-    'BLACKLIST_AFTER_ROTATION': True,
-
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
-
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-    'AUTH_COOKIE': 'jwt_token',  # Cookie name. Enables cookies if value is set.
-    'AUTH_COOKIE_DOMAIN': None,     # A string like "example.com", or None for standard domain cookie.
-    'AUTH_COOKIE_SECURE': False,    # Whether the auth cookies should be secure (https:// only).
-    'AUTH_COOKIE_HTTP_ONLY' : True, # Http only cookie flag.It's not fetch by javascript.
-    'AUTH_COOKIE_PATH': '/',        # The path of the auth cookie.
-    'AUTH_COOKIE_SAMESITE': 'Lax',
-
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    "AUTH_COOKIE": "jwt_token",  # Cookie name. Enables cookies if value is set.
+    "AUTH_COOKIE_DOMAIN": None,  # A string like "example.com", or None for standard domain cookie.
+    "AUTH_COOKIE_SECURE": False,  # Whether the auth cookies should be secure (https:// only).
+    "AUTH_COOKIE_HTTP_ONLY": True,  # Http only cookie flag.It's not fetch by javascript.
+    "AUTH_COOKIE_PATH": "/",  # The path of the auth cookie.
+    "AUTH_COOKIE_SAMESITE": "Lax",
 }
 
 
 REST_FRAMEWORK = {
     # YOUR SETTINGS
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
     ],
 }
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Your Project API',
-    'DESCRIPTION': 'Your project description',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
+    "TITLE": "Your Project API",
+    "DESCRIPTION": "Your project description",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
     # OTHER SETTINGS
 }
 WSGI_APPLICATION = "out.wsgi.application"
@@ -140,13 +144,11 @@ DATABASES = {
         "PASSWORD": os.getenv("DB_PASSWORD", default="228322"),
         "HOST": os.getenv("DB_HOST", default="127.0.0.1"),
         "PORT": os.getenv("DB_PORT", default="4000"),
-        'OPTIONS': {
-            'options': '-c search_path=practices,public'
-        },
+        "OPTIONS": {"options": "-c search_path=practices,public"},
     }
 }
 
-
+AUTH_USER_MODEL = "users.AuthsExtendedUser"
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 

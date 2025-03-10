@@ -11,7 +11,6 @@ mysqlclient==2.2.4
 pytz==2024.1
 PyYAML==6.0.1
 referencing==0.33.0
-rpds-py==0.18.0
 sqlparse==0.4.4
 typing_extensions==4.10.0
 uritemplate==4.1.1

@@ -18,5 +18,5 @@ class CompanyCreateView(CreateAPIView):
 
 class CompanySingleView(RetrieveAPIView):
     permission_classes = [AllowAny]
-    queryset = Companies.objects.prefetch_related("company__themes")
+    queryset = Companies.objects.all()
     serializer_class = CompaniesSerializer

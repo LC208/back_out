@@ -9,10 +9,10 @@ class DocLink(models.Model):
     practices = models.ManyToManyField(
         "practices.Practice",
         through="practices.PracticeDocLinkRelation",
-        related_name="doc_links",
+        related_name="doclinks",
     )
     company = models.ForeignKey(
-        Companies, on_delete=models.DO_NOTHING, related_name="doc_links"
+        Companies, on_delete=models.DO_NOTHING, related_name="doclinks"
     )
 
     class Meta:

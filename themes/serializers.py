@@ -7,28 +7,10 @@ class ThemeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Theme
-        fields = ["id", "name", "practice_id"]
-
-
-class ThemeNoIdSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Theme
-        exclude = ["id", "practice"]
-        write_only_fields = ("company",)
+        fields = ["id", "title", "practice_id"]
 
 
 class ThemeSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Theme
-        fields = "__all__"
-        write_only_fields = ("company",)
-
-
-class ThemeTrimmedSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField()
-
-    class Meta:
-        model = Theme
-        exclude = ["practices"]
-        write_only_fields = ("company",)
+        fields = ["id", "title"]

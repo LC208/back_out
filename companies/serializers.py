@@ -26,12 +26,8 @@ class CompanyTrimmedSerializer(serializers.ModelSerializer):
 
 
 class CompaniesSerializer(serializers.ModelSerializer):
-    themes = serializers.SerializerMethodField()
+    themes = ThemeSerializer(many=True, read_only=True)
 
     class Meta:
         model = Companies
         fields = "__all__"
-
-    def get_themes(self, obj):
-        themes = Theme.objects.filter(practices__company=obj)
-        return ThemeSerializer(themes, many=True).data

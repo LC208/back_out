@@ -1,4 +1,5 @@
 from django.db import models
+from companies.models import Companies
 
 
 class Theme(models.Model):
@@ -8,6 +9,9 @@ class Theme(models.Model):
         "practices.Practice",
         through="practices.PracticeThemeRelation",
         related_name="themes",
+    )
+    company = models.ForeignKey(
+        Companies, on_delete=models.DO_NOTHING, related_name="themes"
     )
 
     class Meta:

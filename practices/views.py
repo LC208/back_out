@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from practices.serializers import PracticeNoIdSerializer, PracticeListSerializer
+from practices.serializers import PracticeListSerializer
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAdminUser, AllowAny
 from practices.models import Practice

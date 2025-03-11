@@ -26,6 +26,6 @@ urlpatterns = [
     path("api/out/base/practice/", include("practices.urls")),
     path("api/out/base/doclinks/", include("doclinks.urls")),
     path("api/out/base/theme/", include("themes.urls")),
-    path("api/out/base/company/", include("companies.urls")),
-    path("api/out/base/faculty/", include("faculties.urls")),
+    path("api/out/legacy/company/", include("companies.urls")),
+    path("api/out/legacy/faculty/", include("faculties.urls")),
 ]

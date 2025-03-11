@@ -1,7 +1,11 @@
 from users.models import AuthsExtendedUser
-from users.serializers import UserSerializer
+from users.serializers import UserSerializer, UserCreateSerializer
 from companies.serializers import CompanySerializer
-from practices.serializers import PracticeTrimmedListSerializer
+from practices.serializers import (
+    PracticeTrimmedListSerializer,
+    PracticeThemeRelationSerializer,
+)
+from themes.serializers import ThemeSerializer
 from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.generics import (
     CreateAPIView,
@@ -9,15 +13,19 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
     ListCreateAPIView,
 )
+from rest_framework.views import APIView
 from companies.models import Companies
-from practices.models import Practice
+from practices.models import Practice, PracticeThemeRelation
+from themes.models import Theme
 from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
+from rest_framework import status
 
 
 class UserCreateView(CreateAPIView):
     permission_classes = [IsAdminUser]
     queryset = AuthsExtendedUser.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserCreateSerializer
 
     def perform_create(self, serializer):
         instance = serializer.save()
@@ -64,3 +72,68 @@ class UserPracticeSingleView(RetrieveUpdateDestroyAPIView):
         data = self.get_serializer(instance).data
         self.perform_destroy(instance)
         return Response(data, status=status.HTTP_200_OK)
+
+
+class UserThemeListCreateView(ListCreateAPIView):
+    serializer_class = ThemeSerializer
+
+    def get_queryset(self):
+        return Theme.objects.filter(company__user=self.request.user).distinct()
+
+    def perform_create(self, serializer):
+        company = get_object_or_404(Companies, user=self.request.user.id)
+        theme = serializer.save(company=company)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UserThemeDeleteUpdateView(RetrieveUpdateDestroyAPIView):
+    serializer_class = ThemeSerializer
+    http_method_names = ["patch", "delete"]
+
+    def get_object(self):
+        return get_object_or_404(
+            Theme, pk=self.kwargs["pk"], company__user=self.request.user
+        )
+
+    def perform_destroy(self, instance):
+        instance.practicethemerelation_set.all().delete()
+        super().perform_destroy(instance)
+
+
+class UserThemePracticeDeleteCreateView(APIView):
+    def post(self, request, *args, **kwargs):
+        practice = get_object_or_404(
+            Practice, pk=self.kwargs["pk"], company__user=self.request.user
+        )
+        theme = get_object_or_404(
+            Theme, pk=self.kwargs["theme"], company__user=self.request.user
+        )
+
+        existing_relation = PracticeThemeRelation.objects.filter(
+            practice=practice, theme=theme
+        ).exists()
+
+        if existing_relation:
+            return Response(status=status.HTTP_200_OK)
+
+        PracticeThemeRelation.objects.create(practice=practice, theme=theme)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    def delete(self, request, *args, **kwargs):
+        practice = get_object_or_404(
+            Practice, pk=self.kwargs["pk"], company__user=self.request.user
+        )
+        theme = get_object_or_404(
+            Theme, pk=self.kwargs["theme"], company__user=self.request.user
+        )
+
+        relation = PracticeThemeRelation.objects.filter(
+            practice=practice, theme=theme
+        ).first()
+
+        if not relation:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        relation.delete()
+        return Response(status=status.HTTP_200_OK)

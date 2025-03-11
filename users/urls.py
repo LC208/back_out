@@ -6,6 +6,9 @@ from users.views import (
     UserCompanyView,
     UserPracticeListCreateView,
     UserPracticeSingleView,
+    UserThemeListCreateView,
+    UserThemeDeleteUpdateView,
+    UserThemePracticeDeleteCreateView,
 )
 
 urlpatterns = [
@@ -14,4 +17,10 @@ urlpatterns = [
     path("company", UserCompanyView.as_view()),
     path("practice", UserPracticeListCreateView.as_view()),
     path("practice/<int:pk>", UserPracticeSingleView.as_view()),
+    path("themes", UserThemeListCreateView.as_view()),
+    path("themes/<int:pk>", UserThemeDeleteUpdateView.as_view()),
+    path(
+        "practice/<int:pk>/themes/<int:theme>",
+        UserThemePracticeDeleteCreateView.as_view(),
+    ),
 ]

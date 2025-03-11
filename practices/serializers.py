@@ -2,11 +2,7 @@ from rest_framework import serializers
 from practices.models import Practice, PracticeThemeRelation
 from companies.models import Companies
 from companies.serializers import CompanySerializer
-from doclinks.serializers import (
-    DockLinkNoIdSerializer,
-    DockLinkSerializer,
-    DockLinkTrimmedSerializer,
-)
+from doclinks.serializers import DockLinkSerializer
 from themes.serializers import ThemeSerializer
 from django.shortcuts import get_object_or_404
 
@@ -22,7 +18,7 @@ class PracticeListSerializer(serializers.ModelSerializer):
 
 
 class PracticeTrimmedListSerializer(serializers.ModelSerializer):
-    doc_links = DockLinkTrimmedSerializer(many=True, read_only=True)
+    doc_links = DockLinkSerializer(many=True, read_only=True)
     themes = ThemeSerializer(many=True, read_only=True)
     faculty_name = serializers.CharField(source="faculty.name", read_only=True)
 
@@ -36,9 +32,3 @@ class PracticeTrimmedListSerializer(serializers.ModelSerializer):
         company = get_object_or_404(Companies, user=request.user.id)
         validated_data["company"] = company
         return super().create(validated_data)
-
-
-class PracticeThemeRelationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PracticeThemeRelation
-        fields = ["practice", "theme"]

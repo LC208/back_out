@@ -6,7 +6,9 @@ class Speciality(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255)
     code = models.CharField(max_length=255)
-    faculty = models.ForeignKey(Faculty, models.DO_NOTHING, blank=True, null=True)
+    faculty = models.ForeignKey(
+        Faculty, models.DO_NOTHING, blank=True, null=True, related_name="specialities"
+    )
     education_level = models.IntegerField()
 
     class Meta:

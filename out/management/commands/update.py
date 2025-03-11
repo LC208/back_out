@@ -6,8 +6,8 @@ import re
 from django.core.management.base import BaseCommand
 import requests
 import out.settings as db
-from specialities.serializers import SpecialitySerializer
-from specialities.models import Speciality
+from apps.specialities.serializers import SpecialitySerializer
+from apps.specialities.models import Speciality
 import json
 
 pictures = [

@@ -1,7 +1,7 @@
 import pandas as pd
 from django.core.management.base import BaseCommand
-from themes.models import Theme
-from practices.models import Practice
+from apps.themes.models import Theme
+from apps.practices.models import Practice
 
 
 class Command(BaseCommand):

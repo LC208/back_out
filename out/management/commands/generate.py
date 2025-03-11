@@ -1,7 +1,7 @@
 import csv
 from django.core.management.base import BaseCommand
-from users.models import AuthsExtendedUser
-from companies.models import Companies
+from apps.users.models import AuthsExtendedUser
+from apps.companies.models import Companies
 from django.utils import timezone
 
 

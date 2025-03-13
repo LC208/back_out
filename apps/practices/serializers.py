@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 
 class PracticeListSerializer(serializers.ModelSerializer):
     company = CompanySerializer()
-    doc_links = DockLinkSerializer(many=True)
+    doclinks = DockLinkSerializer(many=True)
     themes = ThemeSerializer(many=True)
 
     class Meta:
@@ -18,7 +18,7 @@ class PracticeListSerializer(serializers.ModelSerializer):
 
 
 class PracticeTrimmedListSerializer(serializers.ModelSerializer):
-    doc_links = DockLinkSerializer(many=True, read_only=True)
+    doclinks = DockLinkSerializer(many=True, read_only=True)
     themes = ThemeSerializer(many=True, read_only=True)
     faculty_name = serializers.CharField(source="faculty.name", read_only=True)
 

@@ -10,7 +10,8 @@ from apps.doclinks.serializers import DockLinkSerializer
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Companies
-        exclude = ["id", "user"]
+        exclude = ["user"]
+        read_only_fields = ("id",)
 
 
 class CompaniesSerializer(serializers.ModelSerializer):

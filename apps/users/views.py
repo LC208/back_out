@@ -104,6 +104,8 @@ class UserThemeDeleteUpdateView(RetrieveUpdateDestroyAPIView):
 
 
 class UserThemePracticeDeleteCreateView(APIView):
+    serializer_class = None
+
     def post(self, request, *args, **kwargs):
         practice = get_object_or_404(
             Practice, pk=self.kwargs["pk"], company__user=self.request.user
@@ -169,6 +171,8 @@ class UserDocLinkDeleteUpdateView(RetrieveUpdateDestroyAPIView):
 
 
 class UserDocLinkPracticeDeleteCreateView(APIView):
+    serializer_class = None
+
     def post(self, request, *args, **kwargs):
         practice = get_object_or_404(
             Practice, pk=self.kwargs["pk"], company__user=self.request.user

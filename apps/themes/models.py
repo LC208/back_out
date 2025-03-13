@@ -11,7 +11,7 @@ class Theme(models.Model):
         related_name="themes",
     )
     company = models.ForeignKey(
-        Companies, on_delete=models.DO_NOTHING, related_name="themes"
+        Companies, on_delete=models.SET_NULL, related_name="themes", null=True
     )
 
     class Meta:

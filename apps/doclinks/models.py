@@ -12,7 +12,7 @@ class DocLink(models.Model):
         related_name="doclinks",
     )
     company = models.ForeignKey(
-        Companies, on_delete=models.DO_NOTHING, related_name="doclinks"
+        Companies, on_delete=models.SET_NULL, related_name="doclinks", null=True
     )
 
     class Meta:

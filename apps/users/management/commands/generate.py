@@ -6,11 +6,11 @@ from django.utils import timezone
 
 
 def generate_random_password(length=10):
-    """Генерирует случайный пароль (буквы, цифры, символы)."""
+    """Генерирует случайный пароль (буквы и цифры)."""
     import random
     import string
 
-    characters = string.ascii_letters + string.digits + string.punctuation
+    characters = string.ascii_letters + string.digits
     return "".join(random.choice(characters) for _ in range(length))
 
 
@@ -57,7 +57,7 @@ class Command(BaseCommand):
 
                     self.stdout.write(
                         self.style.SUCCESS(
-                            f"Создан пользователь {username} для {company.name}"
+                            f"Создан пользователь {username} для {company.name}, {password}"
                         )
                     )
                 else:

@@ -92,7 +92,7 @@ class Command(BaseCommand):
                         spec.code,
                         spec.faculty_id,
                         spec.education_level,
-                        spec.full_name,
+                        spec.name,
                     )
                     not in groups
                 ):
@@ -112,7 +112,7 @@ class Command(BaseCommand):
                             "code": name,
                             "faculty": faculty_id,
                             "education_level": education_level,
-                            "full_name": full_name,
+                            "name": full_name,
                         }
                     )
 
@@ -120,14 +120,14 @@ class Command(BaseCommand):
                     code=name,
                     faculty=faculty_id,
                     education_level=education_level,
-                    full_name=full_name,
+                    name=full_name,
                 ):
                     not_in.append(
                         {
                             "code": name,
                             "faculty": faculty_id,
                             "education_level": education_level,
-                            "full_name": full_name,
+                            "name": full_name,
                         }
                     )
             deser_upd = SpecialitySerializer(

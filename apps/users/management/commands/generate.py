@@ -57,7 +57,7 @@ class Command(BaseCommand):
 
                     self.stdout.write(
                         self.style.SUCCESS(
-                            f"Создан пользователь {username} для {company.name}, {password}"
+                            f"Создан пользователь {username} для {company.name}"
                         )
                     )
                 else:

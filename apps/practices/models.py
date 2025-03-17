@@ -22,8 +22,8 @@ class Practice(models.Model):
 
 class PracticeDocLinkRelation(models.Model):
     id = models.BigAutoField(primary_key=True)
-    contact = models.ForeignKey(DocLink, models.DO_NOTHING)
-    practice = models.ForeignKey(Practice, models.DO_NOTHING)
+    contact = models.ForeignKey(DocLink, models.CASCADE)
+    practice = models.ForeignKey(Practice, models.CASCADE)
 
     class Meta:
         managed = False
@@ -33,8 +33,8 @@ class PracticeDocLinkRelation(models.Model):
 
 class PracticeThemeRelation(models.Model):
     id = models.BigAutoField(primary_key=True)
-    practice = models.ForeignKey(Practice, models.DO_NOTHING)
-    theme = models.ForeignKey(Theme, models.DO_NOTHING)
+    practice = models.ForeignKey(Practice, models.CASCADE)
+    theme = models.ForeignKey(Theme, models.CASCADE)
 
     class Meta:
         managed = False

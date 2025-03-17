@@ -60,7 +60,7 @@ INSTALLED_APPS = [
     "apps.specialities",
     "apps.practices",
     "apps.faculties",
-    "apps.doclinks",
+    "apps.contacts",
     "apps.crp",
     "apps.companies",
     "apps.userauth",

@@ -3,7 +3,7 @@ from apps.users.serializers import UserSerializer, UserCreateSerializer
 from apps.companies.serializers import CompanySerializer
 from apps.practices.serializers import PracticeTrimmedListSerializer
 from apps.themes.serializers import ThemeSerializer
-from apps.doclinks.serializers import DockLinkSerializer
+from apps.contacts.serializers import ContactSerializer
 from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.generics import (
     CreateAPIView,
@@ -16,10 +16,10 @@ from apps.companies.models import Companies
 from apps.practices.models import (
     Practice,
     PracticeThemeRelation,
-    PracticeDocLinkRelation,
+    PracticeContactRelation,
 )
 from apps.themes.models import Theme
-from apps.doclinks.models import DocLink
+from apps.contacts.models import Contact
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
@@ -144,51 +144,51 @@ class UserThemePracticeDeleteCreateView(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class UserDocLinkListCreateView(ListCreateAPIView):
-    serializer_class = DockLinkSerializer
+class UserContactListCreateView(ListCreateAPIView):
+    serializer_class = ContactSerializer
 
     def get_queryset(self):
-        return DocLink.objects.filter(company__user=self.request.user).distinct()
+        return Contact.objects.filter(company__user=self.request.user).distinct()
 
     def perform_create(self, serializer):
         company = get_object_or_404(Companies, user=self.request.user.id)
-        doclink = serializer.save(company=company)
+        Contact = serializer.save(company=company)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class UserDocLinkDeleteUpdateView(RetrieveUpdateDestroyAPIView):
-    serializer_class = DockLinkSerializer
+class UserContactDeleteUpdateView(RetrieveUpdateDestroyAPIView):
+    serializer_class = ContactSerializer
     http_method_names = ["patch", "delete"]
 
     def get_object(self):
         return get_object_or_404(
-            DocLink, pk=self.kwargs["pk"], company__user=self.request.user
+            Contact, pk=self.kwargs["pk"], company__user=self.request.user
         )
 
     def perform_destroy(self, instance):
-        instance.practicedoclinkrelation_set.all().delete()
+        instance.practicecontactrelation_set.all().delete()
         super().perform_destroy(instance)
 
 
-class UserDocLinkPracticeDeleteCreateView(APIView):
+class UserContactPracticeDeleteCreateView(APIView):
     serializer_class = None
 
     def post(self, request, *args, **kwargs):
         practice = get_object_or_404(
             Practice, pk=self.kwargs["pk"], company__user=self.request.user
         )
-        doclink = get_object_or_404(
-            DocLink, pk=self.kwargs["doclink"], company__user=self.request.user
+        contact = get_object_or_404(
+            Contact, pk=self.kwargs["contact"], company__user=self.request.user
         )
 
-        existing_relation = PracticeDocLinkRelation.objects.filter(
-            practice=practice, contact=doclink
+        existing_relation = PracticeContactRelation.objects.filter(
+            practice=practice, contact=contact
         ).exists()
 
         if existing_relation:
             return Response(status=status.HTTP_200_OK)
 
-        PracticeDocLinkRelation.objects.create(practice=practice, contact=doclink)
+        PracticeContactRelation.objects.create(practice=practice, contact=contact)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -196,12 +196,12 @@ class UserDocLinkPracticeDeleteCreateView(APIView):
         practice = get_object_or_404(
             Practice, pk=self.kwargs["pk"], company__user=self.request.user
         )
-        doclink = get_object_or_404(
-            DocLink, pk=self.kwargs["doclink"], company__user=self.request.user
+        contact = get_object_or_404(
+            Contact, pk=self.kwargs["contact"], company__user=self.request.user
         )
 
-        relation = PracticeDocLinkRelation.objects.filter(
-            practice=practice, contact=doclink
+        relation = PracticeContactRelation.objects.filter(
+            practice=practice, contact=contact
         ).first()
 
         if not relation:

@@ -24,7 +24,7 @@ urlpatterns = [
     path("api/out/base/user/", include("apps.users.urls")),
     path("api/out/base/speciality/", include("apps.specialities.urls")),
     path("api/out/base/practice/", include("apps.practices.urls")),
-    path("api/out/base/doclinks/", include("apps.doclinks.urls")),
+    path("api/out/base/contacts/", include("apps.contacts.urls")),
     path("api/out/base/theme/", include("apps.themes.urls")),
     path("api/out/legacy/company/", include("apps.companies.urls")),
     path("api/out/legacy/faculty/", include("apps.faculties.urls")),

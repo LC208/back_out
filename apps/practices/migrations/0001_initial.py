@@ -7,38 +7,37 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Practice',
+            name="Practice",
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
+                ("id", models.BigAutoField(primary_key=True, serialize=False)),
             ],
             options={
-                'db_table': 'practice_practice',
-                'managed': False,
+                "db_table": "practice_practice",
+                "managed": False,
             },
         ),
         migrations.CreateModel(
-            name='PracticeDocLinkRelation',
+            name="PracticeContactRelation",
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
+                ("id", models.BigAutoField(primary_key=True, serialize=False)),
             ],
             options={
-                'db_table': 'practice_practicecontactrelation',
-                'managed': False,
+                "db_table": "practice_practicecontactrelation",
+                "managed": False,
             },
         ),
         migrations.CreateModel(
-            name='PracticeThemeRelation',
+            name="PracticeThemeRelation",
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
+                ("id", models.BigAutoField(primary_key=True, serialize=False)),
             ],
             options={
-                'db_table': 'practice_practicethemerelation',
-                'managed': False,
+                "db_table": "practice_practicethemerelation",
+                "managed": False,
             },
         ),
     ]

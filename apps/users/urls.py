@@ -9,9 +9,9 @@ from apps.users.views import (
     UserThemeListCreateView,
     UserThemeDeleteUpdateView,
     UserThemePracticeDeleteCreateView,
-    UserDocLinkListCreateView,
-    UserDocLinkDeleteUpdateView,
-    UserDocLinkPracticeDeleteCreateView,
+    UserContactListCreateView,
+    UserContactDeleteUpdateView,
+    UserContactPracticeDeleteCreateView,
 )
 
 urlpatterns = [
@@ -26,10 +26,10 @@ urlpatterns = [
         "practice/<int:pk>/themes/<int:theme>",
         UserThemePracticeDeleteCreateView.as_view(),
     ),
-    path("doclink", UserDocLinkListCreateView.as_view()),
-    path("doclink/<int:pk>", UserDocLinkDeleteUpdateView.as_view()),
+    path("contact", UserContactListCreateView.as_view()),
+    path("contact/<int:pk>", UserContactDeleteUpdateView.as_view()),
     path(
-        "practice/<int:pk>/doclink/<int:doclink>",
-        UserDocLinkPracticeDeleteCreateView.as_view(),
+        "practice/<int:pk>/contact/<int:contact>",
+        UserContactPracticeDeleteCreateView.as_view(),
     ),
 ]

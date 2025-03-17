@@ -2,7 +2,7 @@ from django.db import models
 
 from apps.companies.models import Companies
 from apps.faculties.models import Faculty
-from apps.doclinks.models import DocLink
+from apps.contacts.models import Contact
 from apps.themes.models import Theme
 
 
@@ -20,9 +20,9 @@ class Practice(models.Model):
         db_table = "practice_practice"
 
 
-class PracticeDocLinkRelation(models.Model):
+class PracticeContactRelation(models.Model):
     id = models.BigAutoField(primary_key=True)
-    contact = models.ForeignKey(DocLink, models.CASCADE)
+    contact = models.ForeignKey(Contact, models.CASCADE)
     practice = models.ForeignKey(Practice, models.CASCADE)
 
     class Meta:

@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="DocLink",
+            name="Contact",
             fields=[
                 ("id", models.BigAutoField(primary_key=True, serialize=False)),
                 ("type", models.IntegerField()),

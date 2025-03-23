@@ -33,3 +33,42 @@ class Speciality(models.Model):
     class Meta:
         managed = False
         db_table = "university_speciality"
+
+
+class Stream(models.Model):
+    """
+    Поток
+    """
+
+    short_name = models.CharField(
+        max_length=255,
+        blank=False,
+        null=False,
+        verbose_name="Cоркащенное название потока",
+    )
+    full_name = models.CharField(
+        max_length=255, blank=False, null=True, verbose_name="Полное название потока"
+    )
+    # code = models.CharField(max_length=255, blank=True, null=True, verbose_name="Код потока")
+    year = models.CharField(
+        max_length=255, blank=True, null=True, verbose_name="Год поступления"
+    )
+    speciality = models.ForeignKey(
+        Speciality,
+        on_delete=models.SET_NULL,
+        blank=False,
+        null=True,
+        verbose_name="Спецаильность",
+    )
+    #
+
+    def __str__(self):
+        if self.year:
+            return f"{self.short_name}-{self.year}"
+        return f"Поток {self.short_name}"
+
+    class Meta:
+        managed = False
+        verbose_name = "Поток"
+        verbose_name_plural = "Потоки"
+        db_table = "university_stream"

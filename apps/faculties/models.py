@@ -5,6 +5,9 @@ class Faculty(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255)
     image_url = models.CharField(max_length=1000, blank=True, null=True)
+    ais_id = models.IntegerField(
+        unique=True, blank=True, null=True, verbose_name="ID в АИС"
+    )
 
     def __str__(self):
         return self.name or f"Институт {self.id}"

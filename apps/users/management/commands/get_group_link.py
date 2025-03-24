@@ -4,7 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 
-from base.models import Faculty, Speciality
+from apps.faculties.models import Faculty
+from apps.specialities.models import Speciality
 
 
 class Command(BaseCommand):
@@ -21,7 +22,7 @@ class Command(BaseCommand):
             for link in links:
                 clear_name = (
                     re.sub(r"^\d+(\.\d+)*\s+", "", link.text).split("/")[0].rstrip()
-                )  # удаление номера направления и его описания в скобках
+                )
                 button_link = "https://www.istu.edu" + link.get("href")
                 response = requests.get(button_link)
                 html_link = response.text

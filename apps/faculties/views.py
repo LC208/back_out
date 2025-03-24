@@ -10,7 +10,7 @@ from apps.faculties.serializers import FacultySerializer
 
 class FacultyList(ListAPIView):
     permission_classes = [AllowAny]
-    queryset = Faculty.objects.all()
+    queryset = Faculty.objects.prefetch_related("specialities__stream_set").all()
     serializer_class = FacultySerializer
 
 

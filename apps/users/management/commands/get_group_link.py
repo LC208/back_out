@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 
 from apps.faculties.models import Faculty
-from apps.specialities.models import Speciality
+from apps.specialities.models import Speciality, Stream
 
 
 class Command(BaseCommand):
@@ -30,33 +30,41 @@ class Command(BaseCommand):
                 inst_blank = soup_link.find_all(
                     "div", class_="eduprofile-item-subdname eduprofile-form-element"
                 )
+                inst = []
                 for blank in inst_blank:
                     current_inst = blank.find(
                         class_="eduprofile-form-element-value"
                     ).text
-                    if "заочно-вечернего" not in current_inst:
-                        break
-                inst = Faculty.objects.filter(name=current_inst)
+                    inst.append(Faculty.objects.filter(name=current_inst))
+                # inst = Faculty.objects.filter(name=current_inst)
                 if len(inst) == 0:
                     continue
                 if "бакалавриат" in edu_level:
-                    output_b.append(
-                        {
-                            "faculty": inst[0].id,
-                            "url": button_link,
-                            "full_name": clear_name,
-                            "education_level": 2,
-                        }
-                    )
+                    for i in inst:
+                        if len(i) == 0:
+                            continue
+                        print(i)
+                        output_b.append(
+                            {
+                                "faculty": i[0].id,
+                                "url": button_link,
+                                "full_name": clear_name,
+                                "education_level": 0,
+                            }
+                        )
                 elif "специалитет" in edu_level:
-                    output_b.append(
-                        {
-                            "faculty": inst[0].id,
-                            "url": button_link,
-                            "full_name": clear_name,
-                            "education_level": 1,
-                        }
-                    )
+                    for i in inst:
+                        if len(i) == 0:
+                            continue
+                        print(i)
+                        output_b.append(
+                            {
+                                "faculty": i[0].id,
+                                "url": button_link,
+                                "full_name": clear_name,
+                                "education_level": 1,
+                            }
+                        )
 
         url = "https://www.istu.edu/abiturientu/magistratura/napravleniya"
         response = requests.get(url)
@@ -81,29 +89,34 @@ class Command(BaseCommand):
                 inst_blank = soup_link.find_all(
                     "div", class_="eduprofile-item-subdname eduprofile-form-element"
                 )
+                inst = []
                 for blank in inst_blank:
                     current_inst = blank.find(
                         class_="eduprofile-form-element-value"
                     ).text
-                    if "заочно-вечернего" not in current_inst:
-                        break
-                inst = Faculty.objects.filter(name=current_inst)
+                    inst.append(Faculty.objects.filter(name=current_inst))
+                # inst = Faculty.objects.filter(name=current_inst)
                 if len(inst) == 0:
                     continue
-                output_m.append(
-                    {
-                        "faculty": inst[0].id,
-                        "url": link,
-                        "full_name": clear_name,
-                        "education_level": 3,
-                    }
-                )
+                for i in inst:
+                    if len(i) == 0:
+                        continue
+                    output_m.append(
+                        {
+                            "faculty": i[0].id,
+                            "url": link,
+                            "full_name": clear_name,
+                            "education_level": 2,
+                        }
+                    )
         output_m.extend(output_b)
+        # print(output_m)
         for spec in output_m:
-            specialities = Speciality.objects.filter(
-                faculty=Faculty.objects.get(id=spec["faculty"]),
+            streams = Stream.objects.filter(
+                speciality__faculty=Faculty.objects.get(id=spec["faculty"]),
                 full_name=spec["full_name"],
-                education_level=spec["education_level"],
+                speciality__education_level=spec["education_level"],
             )
-            if specialities.exists():  # Если записи найдены, обновляем их
-                specialities.update(url=spec["url"])
+            print(streams)
+            if streams.exists():
+                streams.update(url=spec["url"])

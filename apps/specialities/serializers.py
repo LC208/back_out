@@ -62,4 +62,5 @@ class StreamSerializer(serializers.ModelSerializer):
             "faculty",
             "education_level",
             "full_name",
+            "url",
         ]

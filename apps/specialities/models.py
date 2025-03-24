@@ -49,7 +49,6 @@ class Stream(models.Model):
     full_name = models.CharField(
         max_length=255, blank=False, null=True, verbose_name="Полное название потока"
     )
-    # code = models.CharField(max_length=255, blank=True, null=True, verbose_name="Код потока")
     year = models.CharField(
         max_length=255, blank=True, null=True, verbose_name="Год поступления"
     )
@@ -60,7 +59,12 @@ class Stream(models.Model):
         null=True,
         verbose_name="Спецаильность",
     )
-    #
+    url = models.CharField(
+        max_length=1000,
+        blank=True,
+        null=True,
+        verbose_name="Ссылка на направление обучения",
+    )
 
     def __str__(self):
         if self.year:

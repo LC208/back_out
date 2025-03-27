@@ -10,7 +10,11 @@ from apps.faculties.serializers import FacultySerializer
 
 class FacultyList(ListAPIView):
     permission_classes = [AllowAny]
-    queryset = Faculty.objects.prefetch_related("specialities__stream_set").all()
+    queryset = (
+        Faculty.objects.prefetch_related("specialities__stream_set")
+        .exclude(image_url__isnull=True)
+        .exclude(image_url="")
+    )
     serializer_class = FacultySerializer
 
 
@@ -22,5 +26,5 @@ class FacultyCreateView(CreateAPIView):
 
 class FacultySingleView(RetrieveAPIView):
     permission_classes = [AllowAny]
-    queryset = Faculty.objects.all()
+    queryset = Faculty.objects.exclude(image_url__isnull=True).exclude(image_url="")
     serializer_class = FacultySerializer

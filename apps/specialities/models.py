@@ -35,22 +35,26 @@ class Speciality(models.Model):
         db_table = "university_speciality"
 
 
-class Stream(models.Model):
+class Direction(models.Model):
     """
-    Поток
+    Направления
     """
 
+    url = models.CharField(
+        max_length=1000,
+        blank=True,
+        null=True,
+        verbose_name="Ссылка на направление обучения",
+    )
+
     short_name = models.CharField(
-        max_length=255,
-        blank=False,
-        null=False,
-        verbose_name="Cоркащенное название потока",
+        max_length=255, blank=False, null=False, verbose_name="Cоркащенное название"
     )
     full_name = models.CharField(
-        max_length=255, blank=False, null=True, verbose_name="Полное название потока"
-    )
-    year = models.CharField(
-        max_length=255, blank=True, null=True, verbose_name="Год поступления"
+        max_length=255,
+        blank=False,
+        null=True,
+        verbose_name="Полное название направления",
     )
     speciality = models.ForeignKey(
         Speciality,
@@ -59,17 +63,35 @@ class Stream(models.Model):
         null=True,
         verbose_name="Спецаильность",
     )
-    url = models.CharField(
-        max_length=1000,
-        blank=True,
+
+    def __str__(self):
+        return f"{self.short_name}"
+
+    class Meta:
+        managed = False
+        verbose_name = "Направление"
+        verbose_name_plural = "Направления"
+        db_table = "university_direction"
+
+
+class Stream(models.Model):
+    """
+    Поток
+    """
+
+    year = models.CharField(
+        max_length=255, blank=True, null=False, verbose_name="Год поступления"
+    )
+    direction = models.ForeignKey(
+        Direction,
+        on_delete=models.SET_NULL,
+        blank=False,
         null=True,
-        verbose_name="Ссылка на направление обучения",
+        verbose_name="Направление",
     )
 
     def __str__(self):
-        if self.year:
-            return f"{self.short_name}-{self.year}"
-        return f"Поток {self.short_name}"
+        return f"{self.direction}-{self.year}"
 
     class Meta:
         managed = False

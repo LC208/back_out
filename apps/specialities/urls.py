@@ -4,7 +4,7 @@ from apps.specialities.views import (
     SpecialityList,
     SpecialityCreateView,
     SpecialitySingleView,
-    StreamList,
+    DirectionList,
 )
 
 urlpatterns = [

@@ -1,18 +1,16 @@
 from rest_framework import serializers
 from apps.faculties.models import Faculty
-from apps.specialities.models import Stream
-from apps.specialities.serializers import StreamSerializer
+from apps.specialities.models import Direction
+from apps.specialities.serializers import DirectionSerializer
 
 
 class FacultySerializer(serializers.ModelSerializer):
-    streams = serializers.SerializerMethodField()
+    directions = serializers.SerializerMethodField()
 
     class Meta:
         model = Faculty
-        fields = ["id", "name", "image_url", "ais_id", "streams"]
+        fields = ["id", "name", "image_url", "ais_id", "directions"]
 
-    def get_streams(self, obj):
-        unique_streams = Stream.objects.filter(speciality__faculty=obj).distinct(
-            "short_name"
-        )
-        return StreamSerializer(unique_streams, many=True).data
+    def get_directions(self, obj):
+        directions = Direction.objects.filter(speciality__faculty=obj)
+        return DirectionSerializer(directions, many=True).data

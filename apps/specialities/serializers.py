@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.specialities.models import Speciality, Stream
+from apps.specialities.models import Speciality, Direction
 
 
 class SpecialityListSerializer(serializers.ListSerializer):
@@ -44,7 +44,7 @@ class SpecialitySerializer(serializers.ModelSerializer):
         list_serializer_class = SpecialityListSerializer
 
 
-class StreamSerializer(serializers.ModelSerializer):
+class DirectionSerializer(serializers.ModelSerializer):
     speciality_name = serializers.CharField(source="speciality.name", read_only=True)
     speciality_code = serializers.CharField(source="speciality.code", read_only=True)
     faculty = serializers.IntegerField(source="speciality.faculty.id", read_only=True)
@@ -53,7 +53,7 @@ class StreamSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Stream
+        model = Direction
         fields = [
             "id",
             "short_name",

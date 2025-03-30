@@ -4,8 +4,8 @@ from rest_framework.generics import (
     ListAPIView,
     RetrieveAPIView,
 )
-from apps.specialities.models import Speciality, Stream
-from apps.specialities.serializers import SpecialitySerializer, StreamSerializer
+from apps.specialities.models import Speciality, Direction
+from apps.specialities.serializers import SpecialitySerializer, DirectionSerializer
 from django.db.models import Min
 
 
@@ -27,14 +27,7 @@ class SpecialitySingleView(RetrieveAPIView):
     serializer_class = SpecialitySerializer
 
 
-class StreamList(ListAPIView):
+class DirectionList(ListAPIView):
     permission_classes = [AllowAny]
-    serializer_class = StreamSerializer
-
-    def get_queryset(self):
-        subquery = (
-            Stream.objects.values("short_name")
-            .annotate(min_id=Min("id"))
-            .values("min_id")
-        )
-        return Stream.objects.filter(id__in=subquery)
+    serializer_class = DirectionSerializer
+    queryset = Direction.objects.all()

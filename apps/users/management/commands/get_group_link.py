@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 
 from apps.faculties.models import Faculty
-from apps.specialities.models import Speciality, Stream
+from apps.specialities.models import Direction, Stream
 
 
 class Command(BaseCommand):
@@ -112,7 +112,7 @@ class Command(BaseCommand):
         output_m.extend(output_b)
         # print(output_m)
         for spec in output_m:
-            streams = Stream.objects.filter(
+            streams = Direction.objects.filter(
                 speciality__faculty=Faculty.objects.get(id=spec["faculty"]),
                 full_name=spec["full_name"],
                 speciality__education_level=spec["education_level"],

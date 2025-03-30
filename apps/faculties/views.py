@@ -11,7 +11,7 @@ from apps.faculties.serializers import FacultySerializer
 class FacultyList(ListAPIView):
     permission_classes = [AllowAny]
     queryset = (
-        Faculty.objects.prefetch_related("specialities__stream_set")
+        Faculty.objects.prefetch_related("specialities__direction_set")
         .exclude(image_url__isnull=True)
         .exclude(image_url="")
     )

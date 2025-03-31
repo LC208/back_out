@@ -22,18 +22,26 @@ class UserAuthView(GenericAPIView):
             password=request.data.get("password"),
         )
         if user and Companies.objects.filter(user=user.id).first():
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            remember_me = serializer.validated_data.get("rememberMe", False)
+
+            data = {"rememberMe": remember_me}
             refresh = RefreshToken.for_user(user)
             refresh.payload.update({"user_id": user.id, "username": user.username})
-            data = {"access": str(refresh.access_token)}
+            data["access"] = str(refresh.access_token)
             response = Response(data)
-            response.set_cookie(
-                key=settings.SIMPLE_JWT["AUTH_COOKIE"],
-                value=str(refresh),
-                expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
-                secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
-                httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
-                samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
-            )
+            if remember_me:
+                response.set_cookie(
+                    key=settings.SIMPLE_JWT["AUTH_COOKIE"],
+                    value=str(refresh),
+                    max_age=int(
+                        settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()
+                    ),
+                    secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
+                    httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
+                    samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+                )
             return response
         else:
             return Response({"error": "Wrong credentials"})

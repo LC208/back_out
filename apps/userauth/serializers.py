@@ -6,6 +6,7 @@ class AuthSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=True, write_only=True)
     password = serializers.CharField(required=True, write_only=True)
     access = serializers.CharField(read_only=True)
+    rememberMe = serializers.BooleanField(required=False, default=False)
 
     class Meta:
         model = AuthsExtendedUser
@@ -13,5 +14,6 @@ class AuthSerializer(serializers.ModelSerializer):
             "username",
             "password",
             "access",
+            "rememberMe",
         ]
         write_only_fields = ("password",)

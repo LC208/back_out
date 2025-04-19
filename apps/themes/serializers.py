@@ -5,4 +5,4 @@ from apps.themes.models import Theme
 class ThemeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Theme
-        fields = ["id", "title"]
+        fields = ["id", "title", "type"]

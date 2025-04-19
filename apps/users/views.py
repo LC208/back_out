@@ -1,18 +1,19 @@
 from apps.users.models import AuthsExtendedUser
 from apps.users.serializers import UserSerializer, UserCreateSerializer
-from apps.companies.serializers import CompanySerializer
+from apps.companies.serializers import CompanySerializer, YearMetaCompanySerializer
 from apps.practices.serializers import PracticeTrimmedListSerializer
 from apps.themes.serializers import ThemeSerializer
 from apps.contacts.serializers import ContactSerializer
 from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.generics import (
     CreateAPIView,
+    RetrieveAPIView,
     RetrieveUpdateAPIView,
     RetrieveUpdateDestroyAPIView,
     ListCreateAPIView,
 )
 from rest_framework.views import APIView
-from apps.companies.models import Companies
+from apps.companies.models import Companies, YearMetaCompany
 from apps.practices.models import (
     Practice,
     PracticeThemeRelation,
@@ -23,6 +24,8 @@ from apps.contacts.models import Contact
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
 
 
 class UserCreateView(CreateAPIView):
@@ -52,6 +55,30 @@ class UserCompanyView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return get_object_or_404(Companies, user=self.request.user.id)
+
+
+class UserCompanyMetaListCreateView(ListCreateAPIView):
+    serializer_class = YearMetaCompanySerializer
+
+    def get_queryset(self):
+        return YearMetaCompany.objects.filter(
+            company__user=self.request.user
+        ).distinct()
+
+    def perform_create(self, serializer):
+        company = get_object_or_404(Companies, user=self.request.user.id)
+        ymc = serializer.save(company=company)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UserCompanyMetaDeleteUpdateView(RetrieveUpdateDestroyAPIView):
+    serializer_class = YearMetaCompanySerializer
+    http_method_names = ["patch", "delete"]
+
+    def get_object(self):
+        return get_object_or_404(
+            YearMetaCompany, pk=self.kwargs["pk"], company__user=self.request.user
+        )
 
 
 class UserPracticeListCreateView(ListCreateAPIView):

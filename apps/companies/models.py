@@ -1,5 +1,6 @@
 from django.db import models
 from apps.users.models import AuthsExtendedUser
+from django.core.validators import MinValueValidator
 
 
 class Companies(models.Model):
@@ -19,3 +20,36 @@ class Companies(models.Model):
     class Meta:
         managed = False
         db_table = "practice_company"
+
+
+class YearMetaCompany(models.Model):
+    """
+    Мета-информация по годам для компании
+    """
+
+    year = models.IntegerField(blank=False, null=False, verbose_name="Год")
+    hire_count = models.IntegerField(
+        default=1,
+        verbose_name="Набор (кол-во студентов)",
+        validators=(MinValueValidator(0),),
+    )
+    company = models.ForeignKey(
+        Companies,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False,
+        verbose_name="Компания",
+        related_name="year_meta_company",
+    )
+
+    class Meta:
+        managed = False
+        db_table = "practice_yearmetacompany"
+        verbose_name = "Мета-информация по годам для компании"
+        verbose_name_plural = "Мета-информация по годам для компаний"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["year", "company"],
+                name="unique_year_company_on_yearmetacompany",
+            )
+        ]

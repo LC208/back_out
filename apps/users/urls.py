@@ -12,12 +12,16 @@ from apps.users.views import (
     UserContactListCreateView,
     UserContactDeleteUpdateView,
     UserContactPracticeDeleteCreateView,
+    UserCompanyMetaListCreateView,
+    UserCompanyMetaDeleteUpdateView,
 )
 
 urlpatterns = [
     path("add", UserCreateView.as_view(), name="user_add"),
     path("info", UserInfoView.as_view()),
     path("company", UserCompanyView.as_view()),
+    path("company/meta", UserCompanyMetaListCreateView.as_view()),
+    path("company/meta/<int:pk>", UserCompanyMetaDeleteUpdateView.as_view()),
     path("practice", UserPracticeListCreateView.as_view()),
     path("practice/<int:pk>", UserPracticeSingleView.as_view()),
     path("themes", UserThemeListCreateView.as_view()),

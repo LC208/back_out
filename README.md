@@ -73,7 +73,7 @@ DUMP_PATH=./dump.sql
 
 # Переменные для Django (если используются)
 SECRET_KEY=your_secret_key
-DEBUG="" (Пустой для False и Любое значение для True)
+DEBUG="" # (Пустой для False и Любое значение для True)
 ALLOWED_HOSTS=*
 ```
 
@@ -96,5 +96,6 @@ ALLOWED_HOSTS=*
 * **back** — backend на Django
 
   * При запуске выполняет `makemigrations`, `migrate` и запускает сервер на `0.0.0.0:8000`.
+
 
 

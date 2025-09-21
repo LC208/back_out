@@ -71,7 +71,7 @@ DB_PORT=5432
 # Путь до SQL-дампа (например, дампа с прода)
 DUMP_PATH=./dump.sql
 
-# Переменные для Django (если используются)
+# Переменные для Django
 SECRET_KEY=your_secret_key
 DEBUG="" # (Пустой для False и Любое значение для True)
 ```
@@ -95,6 +95,7 @@ DEBUG="" # (Пустой для False и Любое значение для True
 * **back** — backend на Django
 
   * При запуске выполняет `makemigrations`, `migrate` и запускает сервер на `0.0.0.0:8000`.
+
 
 
 
